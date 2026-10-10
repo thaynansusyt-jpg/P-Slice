@@ -75,8 +75,16 @@ if [[ ! -s smoke-results/pid-after-taps.txt ]]; then
   echo "FAIL: Game process exited while emulator was healthy" | tee smoke-results/status.txt
   exit 1
 fi
+# Compilation and process survival are not enough. The build can be stuck on
+# the splash/disclaimer; require the actual main menu's runtime marker.
+if ! grep -q 'CHAPTER2_MAIN_MENU_READY' smoke-results/logcat.txt; then
+  echo "FAIL: App remained alive but did not reach the main menu. Check after-menu.png." | tee smoke-results/status.txt
+  grep -E 'CHAPTER2_|source/.*hx:' smoke-results/logcat.txt | tail -65 || true
+  exit 1
+fi
+echo "PASS: Chapter 2 custom main menu reached in Android 15."
 if grep -q "CHAPTER2_MOD_WARNING" smoke-results/logcat.txt; then
   echo "FAIL: Embedded Chapter 2 mod files were not available on startup" | tee smoke-results/status.txt
   exit 1
 fi
-echo "PASS: APK installed, opened, survived interactions and remained alive on Android 15. Full songs not yet playtested." | tee smoke-results/status.txt
+echo "PASS: APK installed, survived, and reached the interactive main menu on Android 15. Chapter 2 track menu and complete songs not yet verified." | tee smoke-results/status.txt
