@@ -1,0 +1,66 @@
+name: Vs Tankman Chapter 2 Android APK
+on:
+  push:
+    branches: [friday-night-funkin-vs-tankman-chapter-2]
+    paths:
+      - '.github/workflows/chapter2-apk.yml'
+      - 'Project.xml'
+      - 'source/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: chapter2-android-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Checkout Chapter 2
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+      - name: Set up Haxe 4.3.6
+        uses: krdlab/setup-haxe@master
+        with:
+          haxe-version: '4.3.6'
+      - name: Restore compilation dependencies
+        id: libs
+        uses: actions/cache/restore@v4
+        with:
+          path: .haxelib/
+          key: P-Slice.1.0.mobile-cache
+          restore-keys: |
+            P-Slice.1.0.mobile-cache
+      - name: Install mobile Haxe libraries if uncached
+        if: steps.libs.outputs.cache-hit != 'true'
+        run: |
+          haxelib newrepo
+          bash ./setup/mobile.sh
+      - name: Cache dependency tree
+        if: steps.libs.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .haxelib/
+          key: chapter2-mobile-dependencies-${{ runner.os }}-${{ hashFiles('setup/mobile.sh') }}
+      - name: Configure Android toolchain
+        run: |
+          haxelib run lime config ANDROID_SDK "$ANDROID_HOME"
+          haxelib run lime config ANDROID_NDK_ROOT "$ANDROID_NDK_HOME"
+          haxelib run lime config JAVA_HOME "$JAVA_HOME_17_X64"
+          haxelib run lime config ANDROID_SETUP true
+      - name: Build signed debug APK
+        run: haxelib run lime build android -debug
+      - name: Collect APK
+        run: |
+          find export -type f -name '*.apk' -print
+          mkdir -p chapter2-apk
+          find export -type f -name '*.apk' -exec cp {} chapter2-apk/ \;
+          test -n "$(find chapter2-apk -name '*.apk' -print -quit)"
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vs-Tankman-Chapter2-Android-APK
+          path: chapter2-apk/*.apk
+          if-no-files-found: error
