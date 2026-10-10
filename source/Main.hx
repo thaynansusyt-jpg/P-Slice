@@ -284,6 +284,11 @@ class Main extends Sprite
 
 		addChild(gameObject);
 		#if (CHAPTER2_STANDALONE && debug)
+		// Keep hxcpp logcat diagnostics, but hide the HaxeFlixel debugger
+		// windows which obscure both the mobile touchpad and the Tankman menu.
+		FlxG.debugger.visible = false;
+		#end
+		#if (CHAPTER2_STANDALONE && debug)
 		// Do not obstruct touch buttons or menus with the Flixel IDE debugger
 		// in the standalone Android playtest APK. Preserve crash logs in logcat.
 		FlxG.debugger.visible = false;
