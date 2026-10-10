@@ -58,6 +58,11 @@ class TitleState extends MusicBeatState
 		CacheSystem.clearStoredMemory();
 		super.create();
 		CacheSystem.clearUnusedMemory();
+		#if (CHAPTER2_STANDALONE && debug)
+		// Debug APKs expose a full-screen Flixel inspector on Android.
+		// The inspector intercepts all touch/keyboard input during the title.
+		FlxG.debugger.visible = false;
+		#end
 		startIntro();
 	}
 
@@ -265,6 +270,9 @@ class TitleState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		#if (CHAPTER2_STANDALONE && debug)
+		FlxG.debugger.visible = false;
+		#end
 		#if debug
 		if (controls.FAVORITE)
 			moveToAttract();
