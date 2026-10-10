@@ -87,6 +87,9 @@ class MainMenuState extends MusicBeatState
 		#end
 
 		super.create();
+		#if (CHAPTER2_STANDALONE && debug)
+		FlxG.debugger.visible = false;
+		#end
 		#if TOUCH_CONTROLS_ALLOWED
 		if (controls.mobileC)
 			new mobile.states.MobileMenuState(this);
@@ -94,6 +97,16 @@ class MainMenuState extends MusicBeatState
 		#end
 		new DesktopMenuState(this);
 		#if CHAPTER2_STANDALONE
+		// The TitleState logger suppresses most later traces on Android.
+		// Keep an observable app-private readiness marker for instrumentation.
+		try
+		{
+			File.saveContent(StorageUtil.getStorageDirectory() + 'chapter2-main-menu-ready.marker', 'ready');
+		}
+		catch (err:haxe.Exception)
+		{
+			trace('CHAPTER2_MAIN_MENU_MARKER_ERROR: ' + err.message);
+		}
 		trace('CHAPTER2_MAIN_MENU_READY');
 		#end
 		
@@ -113,6 +126,9 @@ class MainMenuState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
+		#if (CHAPTER2_STANDALONE && debug)
+		FlxG.debugger.visible = false;
+		#end
 		if (FlxG.sound.music.volume < 0.8)
 			FlxG.sound.music.volume += 0.5 * elapsed;
 		super.update(elapsed);
