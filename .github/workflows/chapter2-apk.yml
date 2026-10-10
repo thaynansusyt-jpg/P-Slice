@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: .haxelib/
-          key: P-Slice.1.0.mobile-cache
+          key: chapter2-mobile-dependencies-${{ runner.os }}-${{ hashFiles('setup/mobile.sh') }}
           restore-keys: |
             P-Slice.1.0.mobile-cache
       - name: Install mobile Haxe libraries if uncached
@@ -44,6 +44,8 @@ jobs:
         with:
           path: .haxelib/
           key: chapter2-mobile-dependencies-${{ runner.os }}-${{ hashFiles('setup/mobile.sh') }}
+      - name: Install hxcpp debug server for debug APK
+        run: haxelib install hxcpp-debug-server 1.2.4 --quiet
       - name: Configure Android toolchain
         run: |
           haxelib run lime config ANDROID_SDK "$ANDROID_HOME"
