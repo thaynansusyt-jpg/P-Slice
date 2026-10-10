@@ -58,7 +58,7 @@ def check(mod: Path):
                 continue
             with png.open("rb") as f:
                 header = f.read(24)
-            if header[:8] != b"\\x89PNG\\r\\n\\x1a\\n":
+            if header[:8] != bytes([137,80,78,71,13,10,26,10]):
                 problems.append(f"{png.relative_to(mod)}: invalid PNG")
                 continue
             w,h = struct.unpack(">II", header[16:24])
