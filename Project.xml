@@ -216,6 +216,8 @@
 
 	<section if="MODS_ALLOWED">
 		<assets path='example_mods' rename='mods' embed='false' />
+		<!-- Chapter 2 standalone mod bundled with custom branch builds -->
+		<assets path='mods/tankman-chapter-2' rename='mods/tankman-chapter-2' embed='false' />
 	</section>
 	<assets path='art/readme.txt' rename='do NOT readme.txt' unless="mobile" />
 
