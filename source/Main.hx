@@ -283,6 +283,12 @@ class Main extends Sprite
 		gameObject._customSoundTray = mikolka.vslice.components.FunkinSoundTray;
 
 		addChild(gameObject);
+		#if (CHAPTER2_STANDALONE && debug)
+		// Do not obstruct touch buttons or menus with the Flixel IDE debugger
+		// in the standalone Android playtest APK. Preserve crash logs in logcat.
+		FlxG.debugger.visible = false;
+		FlxG.debugger.toggleKeys = [];
+		#end
 
 		trace("Finishing up..");
 		debugDisplay = new FunkinDebugDisplay(10, 10, 0xFFFFFF);
