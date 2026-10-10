@@ -31,7 +31,7 @@ adb exec-out screencap -p > smoke-results/after-launch.png || true
 echo "Wait for TitleState to be initialized (up to 150 seconds)"
 title_ready=0
 for attempt in $(seq 1 25); do
-  if grep -Eq 'TitleState\\.hx:[0-9]+: Enforcing log settings|CHAPTER2_MAIN_MENU_READY' smoke-results/live-logcat.txt; then
+  if grep -Eq 'TitleState\.hx:[0-9]+: Enforcing log settings|CHAPTER2_MAIN_MENU_READY' smoke-results/live-logcat.txt; then
     title_ready=1
     echo "TitleState reached on attempt $attempt"
     break
