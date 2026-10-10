@@ -39,6 +39,8 @@
 
 	<!-- Compiles mod support for P-Slice. Feel free to disable if you're making a source mod -->
 	<define name="MODS_ALLOWED" if="desktop || mobile" />
+	<!-- Standalone Android package: use app-private storage; no all-files permission. -->
+	<define name="CHAPTER2_STANDALONE" if="android" />
 
 	<section unless="debug">
 		<!-- Adds the ability to use OpenFL asset lookup (defaults to sys if disabled)  -->
