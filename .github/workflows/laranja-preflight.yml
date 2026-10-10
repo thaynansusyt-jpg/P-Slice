@@ -1,0 +1,37 @@
+name: Laranja - Preflight (sem APK)
+
+on:
+  push:
+    branches:
+      - diagnostico-laranja-mobile
+    paths:
+      - 'tools/laranja_debug/**'
+      - '.github/workflows/laranja-preflight.yml'
+  pull_request:
+    paths:
+      - 'tools/laranja_debug/**'
+      - '.github/workflows/laranja-preflight.yml'
+  workflow_dispatch:
+
+jobs:
+  validar-arquivos:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Testes automaticos do validador
+        run: python -m unittest discover -s tools/laranja_debug/tests -v
+      - name: Verificar mod de exemplo, se estiver presente
+        shell: bash
+        run: |
+          if [ -f "example_mods/VsSenhorLaranja_PSlice_Teste/pack.json" ]; then
+            python tools/laranja_debug/validate_mod.py example_mods/VsSenhorLaranja_PSlice_Teste
+          else
+            echo "Mod instalado somente no Android: nao ha arquivos para validar no repositorio."
+          fi
