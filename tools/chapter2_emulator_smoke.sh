@@ -37,6 +37,10 @@ grep -E "FATAL EXCEPTION|Fatal signal|Process $APP .* died|Unable to start activ
 if [[ -s smoke-results/crash-signals.txt ]]; then
   echo "CRASH SIGNALS DETECTED:"
   tail -35 smoke-results/crash-signals.txt
+  echo "----- HXCPP CRASH CONTEXT (BEFORE AND AFTER ERROR) -----"
+  grep -n -B 90 -A 30 -E 'Uncatchable Throw|Fatal signal 4|FATAL EXCEPTION|Critical Error' smoke-results/logcat.txt | tail -250 || true
+  echo "----- ENGINE LOGS -----"
+  grep -E 'I/HXCPP|D/HXCPP|W/HXCPP|E/HXCPP|I/trace|E/trace|SDLActivity|OpenFL|Lime' smoke-results/logcat.txt | tail -100 || true
   echo "FAIL: Runtime crash in Android logcat" | tee smoke-results/status.txt
   exit 1
 fi
