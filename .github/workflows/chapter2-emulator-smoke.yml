@@ -1,10 +1,7 @@
 name: Chapter 2 Android Emulator Smoke Test
+# Manual diagnostic rerun only. The APK workflow itself tests every freshly
+# built APK. Do not auto-test an outdated build on each script edit.
 on:
-  push:
-    branches: [friday-night-funkin-vs-tankman-chapter-2]
-    paths:
-      - '.github/workflows/chapter2-emulator-smoke.yml'
-      - 'tools/chapter2_emulator_smoke.sh'
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,7 +18,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p smoke-apk
-          gh run download 38092614249 -R "$GITHUB_REPOSITORY" -n Vs-Tankman-Chapter2-Android-APK -D smoke-apk
+          RUN_ID="$(gh run list -R "$GITHUB_REPOSITORY" -w chapter2-apk.yml --branch friday-night-funkin-vs-tankman-chapter-2 --status success --limit 1 --json databaseId --jq '.[0].databaseId')"
+          test -n "$RUN_ID" && test "$RUN_ID" != "null"
+          echo "Using fully successful APK workflow run #$RUN_ID"
+          gh run download "$RUN_ID" -R "$GITHUB_REPOSITORY" -n Vs-Tankman-Chapter2-Android-APK -D smoke-apk
           ls -lah smoke-apk
       - name: Enable KVM to accelerate Android emulator
         run: |
