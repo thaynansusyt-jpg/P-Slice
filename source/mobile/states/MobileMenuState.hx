@@ -161,7 +161,8 @@ class MobileMenuState extends FlxBasic {
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
 
-			#end		}
+			#end
+		}
         super.update(elapsed);
     }
 }
