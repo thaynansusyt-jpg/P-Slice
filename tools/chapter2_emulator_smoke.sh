@@ -35,6 +35,18 @@ sleep 4
 adb shell input tap 1160 610 || true
 sleep 12
 adb exec-out screencap -p > smoke-results/after-taps.png || true
+# Android beta FNF splash can open a flashing-lights notice on first launch.
+# On the actual prior screenshot, bottom-left of mobile controls is virtual B.
+echo "Dismiss the flashing-lights warning with in-game B button"
+adb shell input tap 1845 970 || true
+sleep 7
+adb exec-out screencap -p > smoke-results/after-warning.png || true
+echo "Continue through title using in-game A button"
+adb shell input tap 2040 970 || true
+sleep 5
+adb shell input tap 2040 970 || true
+sleep 9
+adb exec-out screencap -p > smoke-results/after-menu.png || true
 adb shell dumpsys activity top > smoke-results/activity-top.txt || true
 # ADB sometimes goes offline in nested Android/ARM emulation under GitHub CI.
 # Distinguish this infrastructure failure from the app actually dying.
