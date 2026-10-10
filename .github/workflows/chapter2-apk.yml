@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: chapter2-android-${{ github.ref }}
   cancel-in-progress: true
@@ -114,3 +115,44 @@ jobs:
           name: Vs-Tankman-Chapter2-Android-APK
           path: chapter2-apk/*.apk
           if-no-files-found: error
+
+  android-smoke:
+    name: Android 15 startup and Chapter 2 menu runtime
+    needs: android
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - name: Checkout test script
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+      - name: Download freshly compiled APK to test (not an old artifact)
+        uses: actions/download-artifact@v4
+        with:
+          name: Vs-Tankman-Chapter2-Android-APK
+          path: smoke-apk
+      - name: Enable KVM emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install the newly built APK and launch it on Android 15
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_5
+          ram-size: 3072M
+          heap-size: 512M
+          disk-size: 8192M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-load -no-snapshot-save -camera-back none -camera-front none
+          disable-animations: true
+          script: bash tools/chapter2_emulator_smoke.sh
+      - name: Upload Android smoke screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chapter2-New-APK-Android15-Test-Report
+          path: smoke-results/
+          if-no-files-found: warn
