@@ -10,6 +10,10 @@ echo "Emulator ABI: $(adb shell getprop ro.product.cpu.abilist)"
 adb shell getprop ro.build.version.release | tee smoke-results/android-version.txt
 adb install -r -g "$APK" 2>&1 | tee smoke-results/install.txt
 adb shell pm list packages | grep -F "$APP" | tee smoke-results/package.txt
+READY_MARKER="/sdcard/Android/data/$APP/files/chapter2-main-menu-ready.marker"
+TRACK_MARKER="/sdcard/Android/data/$APP/files/chapter2-track-menu-ready.marker"
+# Never accept leftover markers from a previous attempt on an existing emulator.
+adb shell rm -f "$READY_MARKER" "$TRACK_MARKER" 2>/dev/null || true
 adb logcat -c
 # Stream logs while emulator is connected; Android test infrastructure may
 # disconnect from ADB during Vulkan graphics initialization.
@@ -50,16 +54,16 @@ fi
 
 # Use Android's physical ENTER key as well as touch. Merely tapping before the
 # preloader finishes cannot be counted as a menu test.
-echo "Wait for confirmed Chapter 2 main menu"
+echo "Wait for confirmed Chapter 2 main menu file marker"
 for attempt in $(seq 1 12); do
-  if grep -q 'CHAPTER2_MAIN_MENU_READY' smoke-results/live-logcat.txt; then
-    echo "CHAPTER2_MAIN_MENU_READY observed on attempt $attempt"
+  if adb shell test -f "$READY_MARKER" 2>/dev/null; then
+    echo "CHAPTER2_MAIN_MENU_READY marker observed on attempt $attempt"
     break
   fi
   adb shell input keyevent 66 >/dev/null 2>&1 || true
   sleep 4
-  if grep -q 'CHAPTER2_MAIN_MENU_READY' smoke-results/live-logcat.txt; then
-    echo "CHAPTER2_MAIN_MENU_READY observed after ENTER keyevent"
+  if adb shell test -f "$READY_MARKER" 2>/dev/null; then
+    echo "CHAPTER2_MAIN_MENU_READY marker observed after ENTER keyevent"
     break
   fi
   adb shell input tap 1160 610 >/dev/null 2>&1 || true
@@ -97,12 +101,12 @@ if [[ ! -s smoke-results/pid-after-taps.txt ]]; then
 fi
 # Compilation and process survival are not enough. The build can be stuck on
 # the splash/disclaimer; require the actual main menu's runtime marker.
-if ! grep -q 'CHAPTER2_MAIN_MENU_READY' smoke-results/logcat.txt; then
-  echo "FAIL: App remained alive but did not reach the main menu. Check after-menu.png." | tee smoke-results/status.txt
+if ! adb shell test -f "$READY_MARKER" 2>/dev/null; then
+  echo "FAIL: App remained alive but main-menu readiness marker was not written. Check screenshots." | tee smoke-results/status.txt
   grep -E 'CHAPTER2_|source/.*hx:' smoke-results/logcat.txt | tail -65 || true
   exit 1
 fi
-echo "PASS: Chapter 2 custom main menu reached in Android 15."
+echo "PASS: Chapter 2 main menu reached (app-private readiness marker present)."
 if grep -q "CHAPTER2_MOD_WARNING" smoke-results/logcat.txt; then
   echo "FAIL: Embedded Chapter 2 mod files were not available on startup" | tee smoke-results/status.txt
   exit 1
