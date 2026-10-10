@@ -25,9 +25,9 @@ jobs:
           python -m pip install --disable-pip-version-check pillow numpy
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg
-      - name: Create music, charts, sprites and backgrounds
+      - name: Create music, charts and backgrounds
         run: python tools/chapter2_factory.py
-      - name: Validate charts and atlas
+      - name: Validate charts and original Tankman reference
         run: |
           python - <<'PY'
           import json
@@ -39,7 +39,10 @@ jobs:
               if 'notes' in j:
                   assert len(j['notes'])==48 and j['format']=='psych_v1',p
           assert len(list(base.glob('songs/*/Inst.ogg')))==6
-          assert (base/'images/characters/ch2-tankman.png').exists()
+          assert not (base/'images/characters/ch2-tankman.png').exists()
+          assert (base/'images/chapter2/sky.png').exists()
+          assert (base/'songs/redeploy/Inst.ogg').exists()
+          print('Original Tankman comes from base-game character tankman.')
           print('All six tracks and original sprite atlas validated.')
           PY
       - name: Commit generated assets
