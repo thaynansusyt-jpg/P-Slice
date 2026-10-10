@@ -79,10 +79,10 @@ jobs:
           PY
       - name: Generate Android project and check Crashlytics before native build
         run: |
-          haxelib run lime update android -debug
+          haxelib run lime update android -release
           python - <<'PY'
           from pathlib import Path
-          roots = [Path("export/debug/android/bin"), Path("export/debug/android")]
+          roots = [Path("export/release/android/bin"), Path("export/release/android")]
           scripts = sorted({p for root in roots if root.exists() for p in root.rglob("*.gradle")})
           print("Gradle files checked:", len(scripts))
           assert scripts, "No Gradle project generated - aborting before native compilation"
@@ -95,20 +95,32 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            export/debug/android/obj/
-            export/debug/android/haxe/
-          key: chapter2-android-native-${{ runner.os }}-${{ github.sha }}
+            export/release/android/obj/
+            export/release/android/haxe/
+          key: chapter2-android-playtest-release-native-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
-            chapter2-android-native-${{ runner.os }}-
+            chapter2-android-playtest-release-native-${{ runner.os }}-
           save-always: true
-      - name: Build signed debug APK
-        run: haxelib run lime build android -debug
-      - name: Collect APK
+      - name: Build optimized Android release binary
+        run: haxelib run lime build android -release
+      - name: Sign optimized standalone APK for Android installation
         run: |
-          find export -type f -name '*.apk' -print
+          set -euo pipefail
           mkdir -p chapter2-apk
-          find export -type f -name '*.apk' -exec cp {} chapter2-apk/ \;
-          test -n "$(find chapter2-apk -name '*.apk' -print -quit)"
+          apk="$(find export/release -type f -name '*.apk' -print -quit)"
+          test -n "$apk"
+          echo "Unsigned/generated APK: $apk"
+          keytool -genkeypair -noprompt -keystore "$RUNNER_TEMP/ch2-playtest.jks" \
+            -storepass android -keypass android -alias chapter2 -keyalg RSA \
+            -keysize 2048 -validity 3650 -dname "CN=Tankman Chapter 2 Playtest, O=Community"
+          build_tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
+          "$build_tools/zipalign" -f -p 4 "$apk" chapter2-apk/TankmanChapter2-aligned.apk
+          "$build_tools/apksigner" sign --ks "$RUNNER_TEMP/ch2-playtest.jks" \
+            --ks-key-alias chapter2 --ks-pass pass:android --key-pass pass:android \
+            --out chapter2-apk/TankmanChapter2-Otimizado.apk chapter2-apk/TankmanChapter2-aligned.apk
+          rm chapter2-apk/TankmanChapter2-aligned.apk
+          "$build_tools/apksigner" verify --verbose chapter2-apk/TankmanChapter2-Otimizado.apk
+          ls -lh chapter2-apk/*
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
