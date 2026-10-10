@@ -1,0 +1,11 @@
+{
+  "name": "Vs. Tankman: Chapter 2",
+  "description": "Original six-song fan-made showdown in the P-Slice engine.",
+  "restart": false,
+  "runsGlobally": false,
+  "color": [
+    255,
+    102,
+    24
+  ]
+}

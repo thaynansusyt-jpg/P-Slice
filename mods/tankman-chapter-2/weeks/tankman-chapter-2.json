@@ -1,0 +1,72 @@
+{
+  "songs": [
+    [
+      "Redeploy",
+      "ch2-tankman",
+      [
+        255,
+        115,
+        24
+      ]
+    ],
+    [
+      "Blackout",
+      "ch2-tankman",
+      [
+        255,
+        115,
+        24
+      ]
+    ],
+    [
+      "Onslaught",
+      "ch2-tankman",
+      [
+        255,
+        115,
+        24
+      ]
+    ],
+    [
+      "Warzone",
+      "ch2-tankman",
+      [
+        255,
+        115,
+        24
+      ]
+    ],
+    [
+      "Last Stand",
+      "ch2-tankman",
+      [
+        255,
+        115,
+        24
+      ]
+    ],
+    [
+      "No More Heroes",
+      "ch2-tankman",
+      [
+        255,
+        115,
+        24
+      ]
+    ]
+  ],
+  "hideFreeplay": false,
+  "weekBackground": "ch2-base",
+  "weekCharacters": [
+    "ch2-tankman",
+    "bf",
+    "gf"
+  ],
+  "storyName": "REINFORCEMENTS ARRIVE",
+  "difficulties": "Easy,Normal,Hard",
+  "weekName": "Tankman Chapter 2",
+  "hideStoryMode": false,
+  "weekBefore": "week7",
+  "startUnlocked": true,
+  "hiddenUntilUnlocked": false
+}

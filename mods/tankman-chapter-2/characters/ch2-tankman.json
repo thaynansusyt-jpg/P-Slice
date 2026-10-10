@@ -1,0 +1,79 @@
+{
+  "animations": [
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "loop": true,
+      "fps": 12,
+      "anim": "idle",
+      "indices": [],
+      "name": "ch2 idle"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "loop": false,
+      "fps": 12,
+      "anim": "singLEFT",
+      "indices": [],
+      "name": "ch2 singLEFT"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "loop": false,
+      "fps": 12,
+      "anim": "singDOWN",
+      "indices": [],
+      "name": "ch2 singDOWN"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "loop": false,
+      "fps": 12,
+      "anim": "singUP",
+      "indices": [],
+      "name": "ch2 singUP"
+    },
+    {
+      "offsets": [
+        0,
+        0
+      ],
+      "loop": false,
+      "fps": 12,
+      "anim": "singRIGHT",
+      "indices": [],
+      "name": "ch2 singRIGHT"
+    }
+  ],
+  "no_antialiasing": false,
+  "image": "characters/ch2-tankman",
+  "position": [
+    0,
+    30
+  ],
+  "healthicon": "ch2-tankman",
+  "flip_x": false,
+  "healthbar_colors": [
+    255,
+    111,
+    28
+  ],
+  "camera_position": [
+    0,
+    0
+  ],
+  "sing_duration": 4,
+  "scale": 1.35,
+  "_editor_isPlayer": false
+}
