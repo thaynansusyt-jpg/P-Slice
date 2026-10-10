@@ -30,3 +30,7 @@ Run `python -m pip install pillow numpy` then `python tools/chapter2_factory.py`
 
 ## Next steps
 Hand polish sprites and background animation, add dialogue/cutscenes, replace demo instrumentals with fully produced songs, check chart timing on device, package APK/ZIP after tests.
+
+## Prototype note
+
+The Story Mode portrait atlas is included. The original six-song demo uses procedural synths and should be playtested in P-Slice on-device before calling the mod a finished release.
