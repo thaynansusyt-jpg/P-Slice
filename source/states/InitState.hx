@@ -158,7 +158,7 @@ class InitState extends MusicBeatState
 				var current = FileSystem.exists(listing) ? File.getContent(listing) : '';
 				if (current.indexOf('tankman-chapter-2|1') < 0)
 				{
-					current = StringTools.replace(current, 'tankman-chapter-2|0', '');
+					current = current.split('tankman-chapter-2|0').join('');
 					File.saveContent(listing, 'tankman-chapter-2|1' + (current.trim().length > 0 ? '\n' + current.trim() : ''));
 				}
 				Mods.updatedOnState = false;
