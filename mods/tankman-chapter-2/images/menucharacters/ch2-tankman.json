@@ -1,0 +1,12 @@
+{
+  "image": "ch2-tankman",
+  "position": [
+    0,
+    0
+  ],
+  "scale": 0.85,
+  "idle_anim": "ch2 idle",
+  "confirm_anim": "ch2 singUP",
+  "flipX": false,
+  "antialiasing": true
+}
