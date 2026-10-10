@@ -16,12 +16,12 @@ jobs:
     steps:
       - name: Checkout smoke test
         uses: actions/checkout@v4
-      - name: Download actual APK from Chapter 2 rebuilt Android APK
+      - name: Download corrected APK compiled in run 38092614249
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p smoke-apk
-          gh run download 38090870479 -R "$GITHUB_REPOSITORY" -n Vs-Tankman-Chapter2-Android-APK -D smoke-apk
+          gh run download 38092614249 -R "$GITHUB_REPOSITORY" -n Vs-Tankman-Chapter2-Android-APK -D smoke-apk
           ls -lah smoke-apk
       - name: Enable KVM to accelerate Android emulator
         run: |
