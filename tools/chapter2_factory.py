@@ -50,65 +50,116 @@ def text(draw, xy, label, size, fill=None, stroke=0):
               stroke_width=stroke, stroke_fill=C["ink"])
 
 def background_art():
-    sky=Image.new("RGBA",(1600,900),C["ink"])
+    """Distinct layered industrial night scene, generated only from geometric shapes."""
+    from random import Random
+    rng=Random(2026)
+    sky=Image.new("RGBA",(1600,900),(0,0,0,255))
     d=ImageDraw.Draw(sky)
     for y in range(900):
-        blend=y/900
-        d.line((0,y,1600,y),fill=(int(8+35*blend),int(14+11*blend),int(29+11*blend),255))
-    d.ellipse((1060,90,1520,550),fill=(209,75,21,255))
-    for i in range(14):
-        x=70+(i*103)%1450
-        d.line((x,600,x+30,300+(i*47)%240),fill=(31,33,44,180),width=9)
+        t=y/900
+        d.line((0,y,1600,y),
+            fill=(int(8+27*t),int(9+12*t),int(23+18*t),255))
+    # Distinct moon with orange glow: black and violet, not a flat sunset.
+    for rad in range(315,205,-6):
+        k=(315-rad)/110
+        d.ellipse((1180-rad,250-rad,1180+rad,250+rad),
+            fill=(int(35+177*k),int(17+54*k),int(33-8*k),255))
+    d.ellipse((958,25,1402,469),fill=(247,96,20,255))
+    for j in range(28):
+        px=995+rng.randint(0,360)
+        py=35+rng.randint(0,380)
+        size=rng.randint(5,30)
+        d.ellipse((px-size,py-size,px+size,py+size),outline=(185,65,22,170),width=3)
+    # Streaking clouds crossing the moon.
+    for i in range(35):
+        x=rng.randint(-150,1700)
+        y=rng.randint(40,570)
+        width=rng.randint(80,240)
+        c=(16,13+rng.randint(0,9),31,230)
+        d.ellipse((x,y,x+width,y+rng.randint(18,45)),fill=c)
+    for i in range(95):
+        x=rng.randint(0,1600)
+        y=rng.randint(0,440)
+        if 940<x<1410 and y<490:continue
+        d.point((x,y),fill=(194,168,173,255))
     sky.save(mkdir(MOD/"images"/"chapter2"/"sky.png"))
-    city=Image.new("RGBA",(1600,820),(0,0,0,0));d=ImageDraw.Draw(city)
-    for i in range(17):
-        x=i*105-50
-        height=220+(i*131)%240
-        d.rectangle((x,720-height,x+90,800),fill=(12,15,22,255))
-        for r in range(4):
+    # Distant skyline as a separate transparent parallax layer.
+    city=Image.new("RGBA",(1600,820),(0,0,0,0))
+    d=ImageDraw.Draw(city)
+    for i in range(29):
+        x=i*62-32
+        hh=rng.randint(155,430)
+        y=710-hh
+        fill=(12+rng.randint(0,9),12+rng.randint(0,7),23+rng.randint(0,7),255)
+        d.rectangle((x,y,x+66,805),fill=fill)
+        if i%4==0:
+            d.line((x+22,y,x+22,y-105),fill=(16,13,23),width=7)
+            d.line((x+10,y-55,x+42,y-55),fill=(18,16,28),width=3)
+        for floor in range(7):
             for col in range(2):
-                if (i+r+col)%3==0:
-                    d.rectangle((x+14+col*38,740-height+r*54,x+29+col*38,757-height+r*54),fill=(190,69,26,255))
-        d.line((x+40,720-height,x+40,640-height),fill=(10,12,19,255),width=7)
-    d.polygon(((1120,340),(1450,360),(1320,430)),fill=(3,8,13,255))
+                wy=y+16+floor*44;wx=x+11+col*29
+                if wy<760 and rng.random()<.30:
+                    d.rectangle((wx,wy,wx+10,wy+11),
+                      fill=(237,91,30,220))
+    # Elevated transmission bridges and guard towers.
+    d.line((0,462,1600,438),fill=(9,11,19,255),width=22)
+    for x in range(0,1600,180):
+        d.line((x,465,x+80,380),fill=(12,13,19,255),width=10)
+        d.line((x+80,380,x+180,462),fill=(12,13,19,255),width=9)
+    for x in (98,488,1450):
+        d.rectangle((x,225,x+78,710),fill=(14,13,21,255))
+        d.rectangle((x-19,205,x+98,255),fill=(21,18,27,255),outline=(243,103,26,255),width=4)
+        for c in range(3):
+            d.rectangle((x+8+c*22,220,x+22+c*22,236),fill=(239,89,25,255))
     city.save(mkdir(MOD/"images"/"chapter2"/"city.png"))
-    ground=Image.new("RGBA",(1600,320),(0,0,0,0));d=ImageDraw.Draw(ground)
-    d.polygon(((0,40),(1600,18),(1600,320),(0,320)),fill=(37,35,40,255))
-    d.line((0,43,1600,21),fill=(255,95,29,255),width=9)
-    for i in range(23):
-        x=(i*127)%1560;y=95+(i*41)%190
-        d.polygon(((x,y),(x+35,y-13),(x+72,y+12),(x+8,y+32)),fill=(19,20,25,255))
+    ground=Image.new("RGBA",(1600,330),(0,0,0,0))
+    d=ImageDraw.Draw(ground)
+    d.polygon(((0,39),(1600,19),(1600,330),(0,330)),fill=(20,21,31,255))
+    d.line((0,39,1600,19),fill=(255,95,26,255),width=6)
+    for k in range(32):
+        x=rng.randint(0,1520);y=rng.randint(69,300)
+        z=rng.randint(5,45)
+        d.polygon(((x,y),(x+z,y-4),(x+z+11,y+7),(x+10,y+z//3)),
+          fill=(10,11,18,255))
+    for x in range(-70,1630,90):
+        d.line((x,170,x+160,330),fill=(34,30,42,255),width=4)
     ground.save(mkdir(MOD/"images"/"chapter2"/"ground.png"))
-    signal=Image.new("RGBA",(230,230),(0,0,0,0));d=ImageDraw.Draw(signal)
-    for r in range(105,25,-22):
-        d.arc((115-r,115-r,115+r,115+r),15,325,fill=C["red"],width=7)
-    d.ellipse((103,103,127,127),fill=C["orange"])
+    signal=Image.new("RGBA",(230,230),(0,0,0,0))
+    d=ImageDraw.Draw(signal)
+    for r in (45,73,103):
+        d.arc((115-r,115-r,115+r,115+r),15,325,fill=(242,53,42,255),width=6)
+    d.ellipse((108,108,123,123),fill=(255,142,42,255))
     signal.save(mkdir(MOD/"images"/"chapter2"/"signal.png"))
-    # Main menu artwork, with open space in the middle for menu text.
-    menu=sky.crop((0,0,1280,720)).copy()
+    # Export the main menu as a clean landscape composition WITHOUT rasterized
+    # menu text: the layout and translations render on top in Haxe.
+    menu=Image.new("RGBA",(1280,720),(0,0,0,255))
+    menu.alpha_composite(sky.resize((1280,720)))
     menu.alpha_composite(city.resize((1280,656)),(0,64))
-    dd=ImageDraw.Draw(menu,"RGBA")
-    dd.rounded_rectangle((75,68,1210,655),radius=28,fill=(5,7,13,215),outline=(255,116,31,255),width=6)
-    text(dd,(132,92),"VS TANKMAN",72,stroke=3)
-    text(dd,(141,180),"CHAPTER 2 // EMERGENCY SIGNAL",29,C["orange"])
-    text(dd,(850,583),"SIX ORIGINAL TRACKS",24)
-    text(dd,(142,587),"THE RADIO NEVER WENT QUIET",20,C["orange"])
+    menu.alpha_composite(ground.resize((1280,180)),(0,540))
+    shade=Image.new("RGBA",menu.size,(0,0,0,0))
+    q=ImageDraw.Draw(shade)
+    for y in range(720):
+        alpha=int(14+50*(y/720))
+        q.line((0,y,1280,y),fill=(4,5,11,alpha))
+    menu=Image.alpha_composite(menu,shade)
     menu.save(mkdir(SHARED/"chapter2"/"menu.png"))
     menu.save(mkdir(MOD/"images"/"menubackgrounds"/"menu_ch2-base.png"))
-    for p in range(2):
-        pass
-    btn=Image.new("RGBA",(530,256),(0,0,0,0));d=ImageDraw.Draw(btn)
+    # The animated main menu button has original highlight frames.
+    btn=Image.new("RGBA",(530,256),(0,0,0,0))
+    d=ImageDraw.Draw(btn)
     for i in range(2):
         y=i*128
-        d.rounded_rectangle((2,y+7,525,y+117),20,
-            fill=(34,34,45,250) if i==0 else (243,103,22,255),
-            outline=C["orange"] if i==0 else C["white"],width=6)
-        text(d,(30,y+35),"TANKMAN CH. 2",47,C["white"] if i==0 else C["ink"],stroke=1)
-    path=mkdir(SHARED/"mainmenu"/"menu_chapter2.png");btn.save(path)
+        d.rounded_rectangle((4,y+8,526,y+118),18,
+            fill=(22,24,33,244) if i==0 else (255,114,37,255),
+            outline=(255,113,40,255) if i==0 else (255,242,221,255),width=5)
+        text(d,(34,y+39),"TANKMAN CHAPTER 2",37,
+             C["white"] if i==0 else C["ink"],stroke=1)
+    out=mkdir(SHARED/"mainmenu"/"menu_chapter2.png")
+    btn.save(out)
     xml=Element("TextureAtlas",imagePath="menu_chapter2.png")
     SubElement(xml,"SubTexture",name="chapter2 basic0000",x="0",y="0",width="530",height="128")
     SubElement(xml,"SubTexture",name="chapter2 white0000",x="0",y="128",width="530",height="128")
-    ElementTree(xml).write(path.with_suffix(".xml"),encoding="utf-8",xml_declaration=True)
+    ElementTree(xml).write(out.with_suffix(".xml"),encoding="utf-8",xml_declaration=True)
 
 def compose_chart(name, slug, bpm, identity, difficulty):
     density={"easy":0.53,"normal":0.76,"hard":1.0}[difficulty]
