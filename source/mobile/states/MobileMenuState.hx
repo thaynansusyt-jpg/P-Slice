@@ -111,7 +111,11 @@ class MobileMenuState extends FlxBasic {
 		optionsBtn.setPosition(FlxG.width - 250, FlxG.height - 145);
 
         #if TOUCH_CONTROLS_ALLOWED
+		#if CHAPTER2_STANDALONE
+		host.addTouchPad('NONE', 'B');
+		#else
 		host.addTouchPad('NONE', 'B_C');
+		#end
 		#end
 
 		if(!host.controls.mobileC) {
@@ -147,6 +151,7 @@ class MobileMenuState extends FlxBasic {
 				selectedSomethin = true;
 				grid.confirmCurrentButton();
 			}
+			#if !CHAPTER2_STANDALONE
 			if (#if TOUCH_CONTROLS_ALLOWED host.touchPad.buttonC.justPressed || #end#if LEGACY_PSYCH FlxG.keys.anyJustPressed(ClientPrefs.keyBinds.get('debug_1')
 				.filter(s -> s != -1)) #else controls.justPressed('debug_1') #end)
 			{
@@ -155,7 +160,8 @@ class MobileMenuState extends FlxBasic {
 				FlxTransitionableState.skipNextTransOut = false;
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
-		}
+
+			#end		}
         super.update(elapsed);
     }
 }
