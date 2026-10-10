@@ -54,6 +54,30 @@ jobs:
           haxelib run lime config ANDROID_NDK_ROOT "$ANDROID_NDK_HOME"
           haxelib run lime config JAVA_HOME "$JAVA_HOME_17_X64"
           haxelib run lime config ANDROID_SETUP true
+      - name: Generate Android project and check Crashlytics before native build
+        run: |
+          haxelib run lime update android -debug
+          python - <<'PY'
+          from pathlib import Path
+          roots = [Path("export/debug/android/bin"), Path("export/debug/android")]
+          scripts = sorted({p for root in roots if root.exists() for p in root.rglob("*.gradle")})
+          print("Gradle files checked:", len(scripts))
+          assert scripts, "No Gradle project generated - aborting before native compilation"
+          conflicts = [str(p) for p in scripts if "firebaseCrashlytics {" in p.read_text(errors="replace")]
+          if conflicts:
+              raise SystemExit("Obsolete Firebase crashlytics Gradle block remains in: " + ", ".join(conflicts))
+          print("Gradle preflight OK: no obsolete firebaseCrashlytics block.")
+          PY
+      - name: Reuse native Android objects after future failed runs
+        uses: actions/cache@v4
+        with:
+          path: |
+            export/debug/android/obj/
+            export/debug/android/haxe/
+          key: chapter2-android-native-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            chapter2-android-native-${{ runner.os }}-
+          save-always: true
       - name: Build signed debug APK
         run: haxelib run lime build android -debug
       - name: Collect APK
