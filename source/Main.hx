@@ -298,7 +298,9 @@ class Main extends Sprite
 		trace("Finishing up..");
 		debugDisplay = new FunkinDebugDisplay(10, 10, 0xFFFFFF);
 		#if mobile
+		#if !CHAPTER2_STANDALONE
 		FlxG.game.addChild(debugDisplay);
+		#end
 		#else
 		#if !debug
 		// var border = new GameBorder();
@@ -312,7 +314,12 @@ class Main extends Sprite
 
 		if (debugDisplay != null)
 		{
+			#if CHAPTER2_STANDALONE
+			// Standalone playtest: user-facing FPS/HXCPP overlays are never rendered.
+			debugDisplay.visible = false;
+			#else
 			debugDisplay.visible = ClientPrefs.data.showFPSOpacity != 0;
+			#end
 			debugDisplay.backgroundOpacity = ClientPrefs.data.showFPSOpacity;
 			debugDisplay.isAdvanced = ClientPrefs.data.fpsRework;
 		}
