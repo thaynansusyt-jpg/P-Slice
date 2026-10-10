@@ -93,6 +93,9 @@ class Chapter2MenuState extends MusicBeatState
         #if TOUCH_CONTROLS_ALLOWED
         addTouchPad('UP_DOWN','A_B');
         #end
+        #if CHAPTER2_STANDALONE
+        trace('CHAPTER2_TRACK_MENU_READY');
+        #end
     }
 
     function refresh():Void
