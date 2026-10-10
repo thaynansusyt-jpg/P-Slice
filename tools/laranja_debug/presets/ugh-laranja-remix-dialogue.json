@@ -1,0 +1,67 @@
+{
+  "dialogue": [
+    {
+      "portrait": "senhor-laranja-reboot",
+      "expression": "normal",
+      "text": "Ah, voltou? Pensei que tivesse ido atualizar os reflexos.",
+      "boxState": "normal",
+      "speed": 0.034
+    },
+    {
+      "portrait": "bf",
+      "expression": "talk",
+      "text": "Beep Bop!",
+      "boxState": "normal",
+      "speed": 0.043
+    },
+    {
+      "portrait": "senhor-laranja-reboot",
+      "expression": "talk",
+      "text": "Calma, azulzinho. Dessa vez eu trouxe um remix inspirado em Ugh, do Tankman. Só que com um upgrade cítrico.",
+      "boxState": "normal",
+      "speed": 0.032
+    },
+    {
+      "portrait": "bf",
+      "expression": "talk",
+      "text": "Beep Bop!",
+      "boxState": "normal",
+      "speed": 0.044
+    },
+    {
+      "portrait": "senhor-laranja-reboot",
+      "expression": "angry",
+      "text": "Tá achando graça? Eu fiquei noites mexendo nos efeitos! Minha paciência tem menos bateria que teu microfone.",
+      "boxState": "angry",
+      "speed": 0.03
+    },
+    {
+      "portrait": "bf",
+      "expression": "talk",
+      "text": "Beep Bop!",
+      "boxState": "normal",
+      "speed": 0.043
+    },
+    {
+      "portrait": "senhor-laranja-reboot",
+      "expression": "talk",
+      "text": "Pode vir. Mas sem culpar o lag quando eu acertar as notas mais difíceis.",
+      "boxState": "normal",
+      "speed": 0.031
+    },
+    {
+      "portrait": "bf",
+      "expression": "talk",
+      "text": "Beep Bop!",
+      "boxState": "normal",
+      "speed": 0.04
+    },
+    {
+      "portrait": "senhor-laranja-reboot",
+      "expression": "angry",
+      "text": "UGH! SENHOR LARANJA REMIX! Bora descobrir quem manda nessa semana!",
+      "boxState": "angry",
+      "speed": 0.026
+    }
+  ]
+}
