@@ -2,7 +2,7 @@
   "songs": [
     [
       "Redeploy",
-      "ch2-tankman",
+      "tankman",
       [
         255,
         115,
@@ -11,7 +11,7 @@
     ],
     [
       "Blackout",
-      "ch2-tankman",
+      "tankman",
       [
         255,
         115,
@@ -20,7 +20,7 @@
     ],
     [
       "Onslaught",
-      "ch2-tankman",
+      "tankman",
       [
         255,
         115,
@@ -29,7 +29,7 @@
     ],
     [
       "Warzone",
-      "ch2-tankman",
+      "tankman",
       [
         255,
         115,
@@ -38,7 +38,7 @@
     ],
     [
       "Last Stand",
-      "ch2-tankman",
+      "tankman",
       [
         255,
         115,
@@ -47,7 +47,7 @@
     ],
     [
       "No More Heroes",
-      "ch2-tankman",
+      "tankman",
       [
         255,
         115,
@@ -58,7 +58,7 @@
   "hideFreeplay": false,
   "weekBackground": "ch2-base",
   "weekCharacters": [
-    "ch2-tankman",
+    "tankman",
     "bf",
     "gf"
   ],

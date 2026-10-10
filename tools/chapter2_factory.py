@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build original Chapter 2 music, charts, graphics and Sparrow atlases.
+"""Build Chapter 2 music, charts and backgrounds (Tankman sprite comes from P-Slice).
 
 Dependencies: Pillow, NumPy, FFmpeg.
 Reproducible, no copyrighted FNF songs/assets are used.
@@ -48,73 +48,6 @@ def font(size):
 def text(draw, xy, label, size, fill=None, stroke=0):
     draw.text(xy, label, font=font(size), fill=fill or C["white"],
               stroke_width=stroke, stroke_fill=C["ink"])
-
-def draw_soldier(frame, pose="idle", variant=0):
-    d = ImageDraw.Draw(frame)
-    j = 2 if variant % 2 else 0
-    # Original silhouettes, not traced from any FNF sprite.
-    d.ellipse((67, 245-j, 121, 289-j), fill=C["ink"])
-    d.ellipse((140, 245+j, 195, 289+j), fill=C["ink"])
-    d.line((89, 252, 100, 208, 124, 203), fill=C["ink"], width=29)
-    d.line((176, 251, 155, 202, 142, 209), fill=C["ink"], width=29)
-    d.rounded_rectangle((78, 116+j, 186, 218+j), 22, fill=C["ink"], outline=(103, 99, 98), width=4)
-    d.polygon([(92, 161+j), (172, 160+j), (167, 206+j), (102, 211+j)], fill=C["gray"])
-    d.line((95, 172+j, 161, 186+j), fill=(72, 76, 81), width=9)
-    d.ellipse((76, 75+j, 183, 168+j), fill=C["ink"])
-    d.rounded_rectangle((81, 77+j, 181, 149+j), 27, fill=C["ink"], outline=(105, 103, 104), width=3)
-    visor = {"idle": 0, "singLEFT": -13, "singRIGHT": 13, "singUP": -9, "singDOWN": 8}[pose]
-    d.rounded_rectangle((99+visor, 106+j, 163+visor, 132+j), 6, fill=(233, 231, 231), outline=(179, 185, 195), width=2)
-    d.polygon([(116+visor, 130+j), (130+visor, 130+j), (131+visor, 140+j), (119+visor, 138+j)], fill=C["white"])
-    # Arms and microphone alter visibly with pose.
-    hands = {"idle":((79, 184),(201, 177)), "singLEFT":((40, 151),(197, 187)),
-             "singRIGHT":((86, 183),(223, 141)), "singUP":((103, 80),(193, 173)),
-             "singDOWN":((61, 236),(208, 230))}[pose]
-    for hx, hy in hands:
-        sx = 94 if hx < 125 else 174
-        d.line((sx, 157+j, hx, hy+j), fill=C["ink"], width=21)
-        d.ellipse((hx-13, hy-13+j, hx+13, hy+13+j), fill=C["ink"])
-    hx, hy = hands[1]
-    d.line((hx, hy-4+j, hx+12, hy-20+j), fill=C["white"], width=8)
-    d.ellipse((hx+5, hy-35+j, hx+26, hy-16+j), fill=C["ink"], outline=C["orange"], width=3)
-    d.arc((76, 75+j, 187, 158+j), 185, 285, fill=C["orange"], width=3)
-
-def sprite_sheet():
-    poses = [("idle", 4), ("singLEFT", 3), ("singDOWN", 3), ("singUP", 3), ("singRIGHT", 3)]
-    frames = sum(n for _, n in poses)
-    w,h=272,304
-    sheet=Image.new("RGBA", (w*frames,h), (0,0,0,0))
-    xml=Element("TextureAtlas", imagePath="ch2-tankman.png")
-    n=0
-    for pose,num in poses:
-        for i in range(num):
-            frame=Image.new("RGBA", (w,h), (0,0,0,0))
-            draw_soldier(frame,pose,i)
-            sheet.alpha_composite(frame,(n*w,0))
-            SubElement(xml,"SubTexture",name=f"ch2 {pose}{i:04d}",
-                       x=str(n*w),y="0",width=str(w),height=str(h))
-            n+=1
-    base=mkdir(MOD/"images"/"characters"/"ch2-tankman.png")
-    sheet.save(base)
-    ElementTree(xml).write(base.with_suffix(".xml"),encoding="utf-8",xml_declaration=True)
-    # Story Mode portrait uses MenuCharacter's special JSON + Sparrow atlas.
-    menuatlas=mkdir(MOD/"images"/"menucharacters"/"ch2-tankman.png")
-    shutil.copyfile(base,menuatlas)
-    shutil.copyfile(base.with_suffix(".xml"),menuatlas.with_suffix(".xml"))
-    menujson={"image":"ch2-tankman","position":[0,0],"scale":0.85,
-              "idle_anim":"ch2 idle","confirm_anim":"ch2 singUP",
-              "flipX":False,"antialiasing":True}
-    menuatlas.with_suffix(".json").write_text(
-        json.dumps(menujson,indent=2)+"\n",encoding="utf-8")
-    # Dual state 150x150 icon
-    icon=Image.new("RGBA",(300,150),(0,0,0,0))
-    for i in range(2):
-        tile=Image.new("RGBA",(272,304),(0,0,0,0))
-        draw_soldier(tile, "idle" if i==0 else "singLEFT")
-        head=tile.crop((68,70,192,173)).resize((130,108))
-        icon.alpha_composite(head,(i*150+8,20))
-        d=ImageDraw.Draw(icon)
-        d.rectangle((i*150,136,(i+1)*150-1,149),fill=C["orange"] if i==0 else C["red"])
-    icon.save(mkdir(MOD/"images"/"icons"/"icon-ch2-tankman.png"))
 
 def background_art():
     sky=Image.new("RGBA",(1600,900),C["ink"])
@@ -197,7 +130,7 @@ def compose_chart(name, slug, bpm, identity, difficulty):
         sections.append({"sectionBeats":4,"sectionNotes":notes,"mustHitSection":take,"changeBPM":False,"bpm":bpm})
     return {"song":name,"notes":sections,"events":[],"bpm":bpm,"needsVoices":False,
         "speed":1.45+identity*.09+(.18 if difficulty=="hard" else -.08 if difficulty=="easy" else 0),
-        "offset":0,"player1":"bf","player2":"ch2-tankman","gfVersion":"gf",
+        "offset":0,"player1":"bf","player2":"tankman","gfVersion":"gf",
         "stage":"ch2-base","format":"psych_v1","artist":"Chapter 2 Original Demo",
         "charter":"Chapter 2 Generator"}
 
@@ -261,7 +194,6 @@ def export_audio(name,slug,bpm,identity):
     print(f"{name}: {duration:.1f}s, {bpm} BPM, {out.stat().st_size} bytes")
 
 def main():
-    sprite_sheet()
     background_art()
     for name,slug,bpm,identity in SONGS:
         for diff in ("easy","normal","hard"):
@@ -269,7 +201,7 @@ def main():
             path.write_text(json.dumps(compose_chart(name,slug,bpm,identity,diff),
                 ensure_ascii=False,separators=(",",":"))+"\n",encoding="utf-8")
         export_audio(name,slug,bpm,identity)
-    print("Chapter 2 original sprites, songs, images and 18 charts generated!")
+    print("Chapter 2 music demos, backgrounds and 18 charts generated. Tankman is loaded from original P-Slice files.")
 
 if __name__=="__main__":
     main()
