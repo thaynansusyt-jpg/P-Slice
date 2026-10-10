@@ -51,6 +51,23 @@ class InitState extends MusicBeatState
 		trace("Loading game settings");
 		ClientPrefs.loadPrefs();
 		#if CHAPTER2_STANDALONE
+		// On first launch of the optimized APK, prefer battery/GPU-friendly
+		// settings suitable for 4 GB Android phones. Users can customize them
+		// afterward; this profile is only applied once per installation.
+		if (FlxG.save.data.chapter2OptimizedDefaultsV1 != true)
+		{
+			ClientPrefs.data.lowQuality = true;
+			ClientPrefs.data.shaders = false;
+			ClientPrefs.data.camZooms = false;
+			ClientPrefs.data.framerate = 60;
+			ClientPrefs.data.showFPSOpacity = 0;
+			ClientPrefs.data.fpsRework = false;
+			FlxG.drawFramerate = 60;
+			FlxG.updateFramerate = 60;
+			FlxG.save.data.chapter2OptimizedDefaultsV1 = true;
+			ClientPrefs.saveSettings();
+			trace('CHAPTER2_OPTIMIZED_PROFILE_APPLIED');
+		}
 		installBundledChapter2();
 		#end
 
