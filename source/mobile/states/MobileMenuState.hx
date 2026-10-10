@@ -49,6 +49,12 @@ class MobileMenuState extends FlxBasic {
 		});
 		storyBtn.selectedOffset.set(10,15);
 
+		grid.makeButton('chapter2', 1, () ->
+		{
+			FlxG.mouse.visible = false;
+			MusicBeatState.switchState(new states.Chapter2MenuState());
+		}).selectedOffset.set(20, 15);
+
 		grid.makeButton('freeplay', 0, () ->
 		{
 			FlxG.mouse.visible = false;
