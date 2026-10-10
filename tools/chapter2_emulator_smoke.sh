@@ -1,54 +1,70 @@
 #!/usr/bin/env bash
-# CI runtime smoke test: runs under Android Emulator 35; checks actual app launch.
+# Android 15 runtime verification of a real GitHub-built APK.
 set -euo pipefail
 mkdir -p smoke-results
 APP="com.thaynan.tankmanchapter2"
 APK="$(find smoke-apk -type f -name '*.apk' -print -quit)"
-if [[ -z "$APK" ]]; then
-  echo "FAIL: APK artifact not found" | tee smoke-results/status.txt
-  exit 1
-fi
+[[ -n "$APK" ]] || { echo "FAIL: APK absent" | tee smoke-results/status.txt; exit 1; }
 echo "APK: $APK"
 echo "Emulator ABI: $(adb shell getprop ro.product.cpu.abilist)"
-echo "APK size: $(stat -c %s "$APK") bytes"
 adb shell getprop ro.build.version.release | tee smoke-results/android-version.txt
 adb install -r -g "$APK" 2>&1 | tee smoke-results/install.txt
 adb shell pm list packages | grep -F "$APP" | tee smoke-results/package.txt
 adb logcat -c
-echo "Launch Android application: $APP"
+# Stream logs while emulator is connected; Android test infrastructure may
+# disconnect from ADB during Vulkan graphics initialization.
+adb logcat -v time -b main -b crash > smoke-results/live-logcat.txt 2>&1 &
+LOGCAT_PID=$!
+trap 'kill "$LOGCAT_PID" 2>/dev/null || true' EXIT
+echo "Launching Android application"
 adb shell monkey -p "$APP" -c android.intent.category.LAUNCHER 1 2>&1 | tee smoke-results/launch.txt
-sleep 32
+# The Android 15 fullscreen tutorial blocks ALL gameplay input until 'Got it'
+# is tapped. Verified location from the prior captured 2340x1080 screenshot.
+sleep 9
+echo "Dismiss Android fullscreen tutorial"
+adb shell input tap 1700 525 || true
+sleep 25
 adb exec-out screencap -p > smoke-results/after-launch.png || true
 adb shell dumpsys activity activities > smoke-results/activities.txt || true
 adb shell pidof "$APP" | tee smoke-results/pid-after-launch.txt || true
-echo "Tapping through intro/tutorial to verify entry into game menu."
-adb shell input tap 620 390 || true
-sleep 3
-adb shell input tap 620 390 || true
-sleep 3
-adb shell input tap 620 390 || true
-sleep 19
+echo "Proceed through FNF title and disclaimer"
+adb shell input tap 1160 610 || true
+sleep 4
+adb shell input tap 1160 610 || true
+sleep 4
+adb shell input tap 1160 610 || true
+sleep 12
 adb exec-out screencap -p > smoke-results/after-taps.png || true
-adb logcat -d -v time -b main -b crash > smoke-results/logcat.txt || true
 adb shell dumpsys activity top > smoke-results/activity-top.txt || true
-adb shell pidof "$APP" | tee smoke-results/pid-after-taps.txt || true
-printf '%s\\n' '----- Chapter 2 startup traces -----'
-grep -E 'CHAPTER2_MOD_|Starting game setup|Finished|MainMenuState|TitleState' smoke-results/logcat.txt | tail -60 || true
-# Capture Android and engine failure signals even when the OpenFL handler swallows Java errors.
-grep -E "FATAL EXCEPTION|Fatal signal|Process $APP .* died|Unable to start activity|UnsatisfiedLinkError|Failed to load.*ApplicationMain|Critical Error" smoke-results/logcat.txt > smoke-results/crash-signals.txt || true
+# ADB sometimes goes offline in nested Android/ARM emulation under GitHub CI.
+# Distinguish this infrastructure failure from the app actually dying.
+if ! adb shell true 2>/dev/null; then
+  echo "WARN: emulator ADB disconnected, trying to reconnect..."
+  adb reconnect offline || true
+  sleep 5
+fi
+adb logcat -d -v time -b main -b crash > smoke-results/logcat.txt 2>/dev/null || true
+[[ -s smoke-results/logcat.txt ]] || cp smoke-results/live-logcat.txt smoke-results/logcat.txt
+adb shell pidof "$APP" > smoke-results/pid-after-taps.txt 2>/dev/null || true
+echo "--- Game-specific startup log ---"
+grep -E 'CHAPTER2_MOD_|source/.*hx:|E/HXCPP|Critical Error|FATAL EXCEPTION|Fatal signal' smoke-results/logcat.txt | tail -75 || true
+# Eliminate unrelated Google-internal dlopen errors.
+grep -E "FATAL EXCEPTION|Fatal signal|Process $APP .* died|Unable to start activity|UnsatisfiedLinkError|Failed to load.*ApplicationMain|Critical Error|CHAPTER2_MOD_ERROR" smoke-results/logcat.txt > smoke-results/crash-signals.txt || true
 if [[ -s smoke-results/crash-signals.txt ]]; then
-  echo "CRASH SIGNALS DETECTED:"
-  tail -35 smoke-results/crash-signals.txt
-  echo "----- HXCPP CRASH CONTEXT (BEFORE AND AFTER ERROR) -----"
-  grep -n -B 90 -A 30 -E 'Uncatchable Throw|Fatal signal 4|FATAL EXCEPTION|Critical Error' smoke-results/logcat.txt | tail -250 || true
-  echo "----- ENGINE LOGS -----"
-  grep -E 'I/HXCPP|D/HXCPP|W/HXCPP|E/HXCPP|I/trace|E/trace|SDLActivity|OpenFL|Lime' smoke-results/logcat.txt | tail -100 || true
-  echo "FAIL: Runtime crash in Android logcat" | tee smoke-results/status.txt
+  echo "FAIL: Android app crash or mod exception" | tee smoke-results/status.txt
+  tail -75 smoke-results/crash-signals.txt
+  exit 1
+fi
+if ! adb shell true >/dev/null 2>&1; then
+  echo "INCONCLUSIVE: Android emulator ADB disconnected. Screenshots and streamed logs uploaded for inspection." | tee smoke-results/status.txt
   exit 1
 fi
 if [[ ! -s smoke-results/pid-after-taps.txt ]]; then
-  echo "FAIL: Application process is no longer running" | tee smoke-results/status.txt
-  tail -100 smoke-results/logcat.txt
+  echo "FAIL: Game process exited while emulator was healthy" | tee smoke-results/status.txt
   exit 1
 fi
-echo "PASS: Android app installed, launched, survived title interactions, and remained running. Full song gameplay still untested." | tee smoke-results/status.txt
+if grep -q "CHAPTER2_MOD_WARNING" smoke-results/logcat.txt; then
+  echo "FAIL: Embedded Chapter 2 mod files were not available on startup" | tee smoke-results/status.txt
+  exit 1
+fi
+echo "PASS: APK installed, opened, survived interactions and remained alive on Android 15. Full songs not yet playtested." | tee smoke-results/status.txt
