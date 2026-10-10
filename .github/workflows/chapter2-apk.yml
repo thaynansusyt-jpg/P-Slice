@@ -44,8 +44,11 @@ jobs:
         with:
           path: .haxelib/
           key: chapter2-mobile-dependencies-${{ runner.os }}-${{ hashFiles('setup/mobile.sh') }}
-      - name: Install hxcpp debug server for debug APK
-        run: haxelib install hxcpp-debug-server 1.2.4 --quiet
+      - name: Install debug-only Haxe libraries
+        run: |
+          haxelib install hxcpp-debug-server 1.2.4 --quiet
+          haxelib install flixel-studio --quiet
+          haxelib install hscript --quiet
       - name: Configure Android toolchain
         run: |
           haxelib run lime config ANDROID_SDK "$ANDROID_HOME"
