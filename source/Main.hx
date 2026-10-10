@@ -306,7 +306,7 @@ class Main extends Sprite
 			debugDisplay.isAdvanced = ClientPrefs.data.fpsRework;
 		}
 
-		#if (debug)
+		#if (debug && desktop)
 		flixel.addons.studio.FlxStudio.create();
 		#end
 
