@@ -93,6 +93,9 @@ class MainMenuState extends MusicBeatState
 		else
 		#end
 		new DesktopMenuState(this);
+		#if CHAPTER2_STANDALONE
+		trace('CHAPTER2_MAIN_MENU_READY');
+		#end
 		
 	}
 
