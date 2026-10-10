@@ -94,6 +94,14 @@ class Chapter2MenuState extends MusicBeatState
         addTouchPad('UP_DOWN','A_B');
         #end
         #if CHAPTER2_STANDALONE
+        try
+        {
+            File.saveContent(StorageUtil.getStorageDirectory() + 'chapter2-track-menu-ready.marker', 'ready');
+        }
+        catch (err:haxe.Exception)
+        {
+            trace('CHAPTER2_TRACK_MENU_MARKER_ERROR: ' + err.message);
+        }
         trace('CHAPTER2_TRACK_MENU_READY');
         #end
     }
@@ -156,6 +164,9 @@ class Chapter2MenuState extends MusicBeatState
 
     override function update(elapsed:Float)
     {
+        #if (CHAPTER2_STANDALONE && debug)
+        FlxG.debugger.visible = false;
+        #end
         if(!busy)
         {
             if(controls.UI_UP_P) shift(-1);
