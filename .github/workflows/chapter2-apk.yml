@@ -47,7 +47,6 @@ jobs:
       - name: Install debug-only Haxe libraries
         run: |
           haxelib install hxcpp-debug-server 1.2.4 --quiet
-          haxelib install flixel-studio --quiet
           haxelib install hscript --quiet
       - name: Configure Android toolchain
         run: |
