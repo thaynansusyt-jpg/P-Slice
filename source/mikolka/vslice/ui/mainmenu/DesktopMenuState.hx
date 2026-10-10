@@ -23,6 +23,7 @@ class DesktopMenuState extends FlxBasic
 {
 	var optionShit:Array<String> = [
 		'story_mode',
+		'chapter2',
 		'freeplay',
 		#if MODS_ALLOWED 'mods', #end
 		#if ACHIEVEMENTS_ALLOWED 'awards', #end
@@ -123,6 +124,8 @@ class DesktopMenuState extends FlxBasic
 						{
 							case 'story_mode':
 								MusicBeatState.switchState(new StoryMenuState());
+							case 'chapter2':
+								MusicBeatState.switchState(new states.Chapter2MenuState());
 							case 'freeplay':
 								{
 									host.persistentDraw = true;
