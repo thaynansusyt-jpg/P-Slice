@@ -54,6 +54,28 @@ jobs:
           haxelib run lime config ANDROID_NDK_ROOT "$ANDROID_NDK_HOME"
           haxelib run lime config JAVA_HOME "$JAVA_HOME_17_X64"
           haxelib run lime config ANDROID_SETUP true
+      - name: Patch a P-Slice Lime Android Gradle template bug
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          template=Path(".haxelib/lime/git/templates/android/template/app/build.gradle")
+          assert template.is_file(), f"Unexpected Lime version or missing template: {template}"
+          content=template.read_text()
+          needle="firebaseCrashlytics {"
+          assert content.count(needle)==1, "Unexpected Gradle template format - stop safely"
+          start=content.index(needle)
+          pos=content.index("{",start)
+          depth=1
+          while depth and pos+1<len(content):
+              pos+=1
+              if content[pos]=="{": depth+=1
+              elif content[pos]=="}": depth-=1
+          assert depth==0, "Unbalanced Firebase Gradle block"
+          cleaned=content[:start]+content[pos+1:]
+          assert needle not in cleaned
+          template.write_text(cleaned)
+          print("Removed unconditional firebaseCrashlytics closure from cached Lime Android template")
+          PY
       - name: Generate Android project and check Crashlytics before native build
         run: |
           haxelib run lime update android -debug
