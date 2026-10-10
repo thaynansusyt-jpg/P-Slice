@@ -26,3 +26,16 @@ The week and chart now use ID `tankman`, matching the character JSON and sprite 
 
 ### What to work on next
 Replace the placeholder song arrangements with composed/mixed original tracks and recorded/licensed vocal takes, sync handwritten charts to those vocals, and test all six tracks on a real Android build.
+
+
+## Tested DirectWave vocal addon (separate download)
+The author provided two monolithic DWP voicebanks for Tankman (26 zones) and Boyfriend (48 zones). Their embedded 32-bit PCM samples were decoded and used to create six experimental vocal takes and three patched difficulty charts per track. The DWP binaries and their embedded machine-path metadata were **not** uploaded to GitHub.
+
+To install: extract this main mod ZIP to `mods/`, then merge the companion `tankman-chapter-2/` folder from the voice addon ZIP supplied in the current chat. Each `songs/<track>/` directory will then contain both `Inst.ogg` and `Voices.ogg`; the overlay charts set `needsVoices: true`.
+
+The debug APK workflow in this branch builds with the instrumental-only files committed here, as the voicebank files remain private. Install the voice addon separately after installing the mod. This is a draft arrangement, not professionally mastered audio.
+
+## Menu / Android
+The Chapter 2 menu is now proportional to screen dimensions and supports Android touch as well as keyboard/controller input; main-menu mobile button spacing was adjusted. The Android debug build has a distinct package ID so it does not overwrite the regular P-Slice engine.
+
+Known limits: actual Android runtime verification, release signing and synced final vocal performances are outstanding.
