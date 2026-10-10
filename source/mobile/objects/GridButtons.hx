@@ -25,8 +25,9 @@ class GridButtons extends FlxTypedSpriteGroup<GridTile>
 	}
 
 	final xItemOffset:Float;
+	final yItemOffset:Float;
 
-	public function new(x:Float, y:Float,x_length:Int, xItemOffset:Int = 200)
+	public function new(x:Float, y:Float,x_length:Int, xItemOffset:Int = 200, yItemOffset:Int = 160)
 	{
 		super(x,y);
 		for (i in 0...x_length)
@@ -34,6 +35,7 @@ class GridButtons extends FlxTypedSpriteGroup<GridTile>
 			buttons.push(new Array());
 		}
 		this.xItemOffset = xItemOffset;
+		this.yItemOffset = yItemOffset;
 	}
 
 	public function makeButton(name:String, gridX:Int, callback:() -> Void):GridTile
@@ -47,7 +49,7 @@ class GridButtons extends FlxTypedSpriteGroup<GridTile>
 	public function addButton(menuItem:GridTile, gridX:Int)
 	{
 		var offsetX:Float = gridX * xItemOffset;
-		var offsetY:Float = buttons[gridX].length * 160;
+		var offsetY:Float = buttons[gridX].length * yItemOffset;
 		menuItem.x = offsetX;
 		menuItem.y = offsetY;
 		menuItem.gridXPos = gridX;

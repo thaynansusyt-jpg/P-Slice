@@ -31,7 +31,7 @@ class MobileMenuState extends FlxBasic {
         this.host = host;
         host.add(this);
 		
-        grid = new GridButtons((MobileScaleMode.gameCutoutSize.x/4)+30, 20, 2,Math.floor((MobileScaleMode.gameCutoutSize.x/4)+750));
+        grid = new GridButtons(FlxG.width * 0.07, FlxG.height * 0.07, 2, Std.int(FlxG.width * 0.47), 130);
 		host.add(grid);
 		grid.onItemSelect.add(s ->{
 			FlxG.sound.play(Paths.sound('confirmMenu'));
@@ -108,7 +108,7 @@ class MobileMenuState extends FlxBasic {
             host.goToOptions();
 		});
 		grid.addButton(optionsBtn,0);
-		optionsBtn.setPosition((MobileScaleMode.gameCutoutSize.x/4)+35, FlxG.height - 200);
+		optionsBtn.setPosition(FlxG.width - 250, FlxG.height - 145);
 
         #if TOUCH_CONTROLS_ALLOWED
 		host.addTouchPad('NONE', 'B_C');

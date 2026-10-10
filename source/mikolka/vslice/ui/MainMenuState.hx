@@ -48,9 +48,9 @@ class MainMenuState extends MusicBeatState
 
 		persistentUpdate = persistentDraw = true;
 
-		bg = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
+		bg = new FlxSprite(0).loadGraphic(Paths.image('chapter2/menu'));
 		bg.antialiasing = VsliceOptions.ANTIALIASING;
-		bg.setGraphicSize(Std.int(bg.width * 1.175));
+		bg.setGraphicSize(FlxG.width, FlxG.height);
 		bg.updateHitbox();
 		bg.screenCenter();
 		add(bg);
