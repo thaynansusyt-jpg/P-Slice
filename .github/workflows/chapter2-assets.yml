@@ -49,5 +49,12 @@ jobs:
           git add mods/tankman-chapter-2 assets/shared/images/chapter2/menu.png assets/shared/images/mainmenu/menu_chapter2.png assets/shared/images/mainmenu/menu_chapter2.xml
           if ! git diff --cached --quiet; then
             git commit -m "build(chapter2): render six tracks, 18 charts, sprites, stage and menu"
-            git push
+            for attempt in 1 2 3; do
+              git fetch origin "$GITHUB_REF_NAME"
+              git rebase "origin/$GITHUB_REF_NAME"
+              if git push origin "HEAD:$GITHUB_REF_NAME"; then exit 0; fi
+              sleep 3
+            done
+            echo "Could not publish generated assets" >&2
+            exit 1
           fi
