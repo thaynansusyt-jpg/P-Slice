@@ -96,6 +96,15 @@ def sprite_sheet():
     base=mkdir(MOD/"images"/"characters"/"ch2-tankman.png")
     sheet.save(base)
     ElementTree(xml).write(base.with_suffix(".xml"),encoding="utf-8",xml_declaration=True)
+    # Story Mode portrait uses MenuCharacter's special JSON + Sparrow atlas.
+    menuatlas=mkdir(MOD/"images"/"menucharacters"/"ch2-tankman.png")
+    shutil.copyfile(base,menuatlas)
+    shutil.copyfile(base.with_suffix(".xml"),menuatlas.with_suffix(".xml"))
+    menujson={"image":"ch2-tankman","position":[0,0],"scale":0.85,
+              "idle_anim":"ch2 idle","confirm_anim":"ch2 singUP",
+              "flipX":False,"antialiasing":True}
+    menuatlas.with_suffix(".json").write_text(
+        json.dumps(menujson,indent=2)+"\n",encoding="utf-8")
     # Dual state 150x150 icon
     icon=Image.new("RGBA",(300,150),(0,0,0,0))
     for i in range(2):
