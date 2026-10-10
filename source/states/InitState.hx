@@ -159,7 +159,7 @@ class InitState extends MusicBeatState
 				if (current.indexOf('tankman-chapter-2|1') < 0)
 				{
 					current = StringTools.replace(current, 'tankman-chapter-2|0', '');
-					File.saveContent(listing, 'tankman-chapter-2|1' + (current.trim().length > 0 ? '\\n' + current.trim() : ''));
+					File.saveContent(listing, 'tankman-chapter-2|1' + (current.trim().length > 0 ? '\n' + current.trim() : ''));
 				}
 				Mods.updatedOnState = false;
 				Mods.pushGlobalMods();
