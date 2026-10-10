@@ -82,6 +82,14 @@ class StorageUtil
 	}
 
 	public static function checkUserStoragePermissions() {
+		#if CHAPTER2_STANDALONE
+		// Android 15 smoke test reproduced a null-reference in
+		// AndroidSettings.requestSetting('MANAGE_APP_ALL_FILES_ACCESS_PERMISSION').
+		// The standalone test build uses its own app-private files directory.
+		trace("Chapter 2: skip unsafe external storage prompt");
+		ClientPrefs.data.storageType = "INTERNAL";
+		return;
+		#else
 		var isAPI33 = AndroidVersion.SDK_INT >= AndroidVersionCode.TIRAMISU;
 		trace("Check perms...");
 		if(ClientPrefs.data.storageType == "INTERNAL") return;
@@ -103,6 +111,7 @@ class StorageUtil
 			|| (!isAPI33 && !has_READ_EXTERNAL_STORAGE))
 			CoolUtil.showPopUp('If you accepted the permissions you are all good!' + '\nIf you didn\'t then expect a crash' + '\nPress OK to see what happens',
 				'Notice!');
+		#end
 	}
 
 	#end
@@ -114,8 +123,8 @@ class StorageUtil
 enum abstract StorageType(String) from String to String
 {
 	final forcedPath = '/storage/emulated/0/';
-	final packageNameLocal = 'com.mikolka9144.pslice';
-	final fileLocal = 'PSliceEngine';
+	final packageNameLocal = #if CHAPTER2_STANDALONE 'com.thaynan.tankmanchapter2' #else 'com.mikolka9144.pslice' #end;
+	final fileLocal = #if CHAPTER2_STANDALONE 'TankmanChapter2' #else 'PSliceEngine' #end;
 
 	//* Important note
 	// These hold cached directories from methods 
