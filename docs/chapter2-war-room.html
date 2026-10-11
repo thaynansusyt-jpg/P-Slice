@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TANKMAN // WAR ROOM — Protótipo</title>
+<style>
+:root{color-scheme:dark;--accent:#ff8739;--bg:#0a0e14;--edge:#39434a;--ink:#e9e6da}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 10%,#47251e 0,#101820 50%,#090c11 90%);font:15px system-ui,Arial,sans-serif;color:var(--ink);min-height:100vh}
+body:after{content:"";pointer-events:none;position:fixed;inset:0;background:repeating-linear-gradient(transparent 0 5px,#0002 5px 6px);opacity:.32}
+header{padding:20px 5vw;border-bottom:1px solid #ff873965;display:flex;justify-content:space-between;align-items:center;gap:15px}
+h1{margin:0;font-size:clamp(24px,5vw,46px);letter-spacing:.08em;color:var(--accent);font-weight:900}
+.tag{font-family:monospace;letter-spacing:.2em;color:#b9d0c4;font-size:11px}
+main{max-width:1300px;margin:auto;padding:3vw;display:grid;grid-template-columns:minmax(230px,1fr) minmax(290px,1.2fr);gap:18px}
+.panel{background:#0c141bdc;border:1px solid #48616a88;box-shadow:inset 0 0 24px #081118;border-radius:10px;padding:18px}
+.head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #445863;padding-bottom:12px;font-family:monospace;font-size:12px;color:#bdd4cb}
+#missions{display:grid;gap:9px;margin-top:15px}.mission{width:100%;border:1px solid #38515c;color:var(--ink);background:#182029;text-align:left;padding:12px 14px;border-radius:5px;cursor:pointer;font-size:15px;font-weight:800;letter-spacing:.04em;transition:.16s}
+.mission span{color:#879fa4;font:12px monospace;margin-right:12px}.mission.active,.mission:focus-visible{border-color:var(--accent);background:#442c20;color:#fff;outline:0;transform:translateX(3px)}
+.radar{height:210px;margin:20px auto;max-width:300px;border:1px solid #50726f;border-radius:50%;position:relative;overflow:hidden;background:repeating-radial-gradient(circle,#18352c99 0 1px,transparent 2px 45px),linear-gradient(90deg,transparent 49.5%,#5bbba330 50%,transparent 50.5%),linear-gradient(0deg,transparent 49.5%,#5bbba330 50%,transparent 50.5%),#071913}
+.radar:before{content:"";position:absolute;width:50%;height:50%;top:0;left:50%;transform-origin:bottom left;background:conic-gradient(from 0deg at bottom left,#5cf7b855,transparent 38deg);animation:sweep 5s linear infinite}
+.radar:after{content:"▲";color:var(--accent);position:absolute;top:34%;left:56%;font-size:20px;text-shadow:0 0 15px #ff7c3f}
+@keyframes sweep{to{transform:rotate(360deg)}}#selected{font-size:clamp(24px,3.8vw,40px);font-weight:900;color:var(--accent);margin:14px 0 4px}#desc{line-height:1.65;color:#c0ced2;min-height:55px}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.stats span{padding:9px;background:#172630;border:1px solid #3a525c;font:13px monospace}
+.launch{font-weight:800;width:100%;border:1px solid #fff3cd;background:var(--accent);color:#101419;padding:14px;border-radius:6px;cursor:pointer}
+.notice{margin-top:12px;color:#a8bec0;font-size:12px;line-height:1.6}#status{min-height:20px;color:#f8c48e;font-family:monospace}
+footer{text-align:center;color:#a5adb1;font:11px monospace;padding:16px}
+@media(max-width:740px){main{grid-template-columns:1fr}header{display:block}.radar{height:165px;max-width:220px}}
+@media(prefers-reduced-motion:reduce){*,*:before{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header><div><div class="tag">TRANSMISSÃO INTERCEPTADA // CANAL 07</div><h1>TANKMAN // WAR ROOM</h1></div><div class="tag">CHAPTER 2 PLUS<br>OPERACIONAL ●</div></header>
+<main>
+<section class="panel"><div class="head"><span>ARQUIVO DE OPERAÇÕES</span><span>06 MISSÕES</span></div><div id="missions"></div></section>
+<section class="panel">
+<div class="head"><span>RADAR TÁTICO • SINAL ATIVO</span><span id="freq">140 BPM</span></div>
+<div class="radar" aria-label="Radar tático decorativo"></div>
+<div class="tag">DOSSIÊ ATIVO</div><div id="selected"></div><p id="desc"></p><div class="stats"><span id="difficulty"></span><span id="identity"></span></div>
+<button class="launch" id="send">ABRIR DOSSIÊ DA MISSÃO →</button><p id="status" aria-live="polite"></p>
+<div class="notice">Protótipo interativo do futuro menu do jogo, sem execução de músicas. Todo o visual é HTML/CSS local, sem chamadas externas nem recompilação Android.</div>
+</section>
+</main>
+<footer>VS. TANKMAN CHAPTER 2 // CONCEPT BUILD // NÃO É O APK FINAL</footer>
+<script>
+const missions=[
+["REDEPLOY",140,"Reforços chegam ao perímetro. Marcha militar, chamada e resposta.","MISSÃO 01","BRASS / MARCH"],
+["BLACKOUT",155,"A energia cai. Um sinal eletrônico tenta atravessar a interferência.","MISSÃO 02","PULSE / HALFTIME"],
+["ONSLAUGHT",165,"A ofensiva começa. Bumbo duplo e frases de ataque.","MISSÃO 03","SAW / GALLOP"],
+["WARZONE",170,"Território disputado. Percussão quebrada e ruído industrial.","MISSÃO 04","DISTORTED / BREAK"],
+["LAST STAND",180,"Última defesa. Harmonia ascendente, atmosfera cinematográfica.","MISSÃO 05","BELL / ANTHEM"],
+["NO MORE HEROES",190,"Operação final. Melodias tensas e confronto decisivo.","MISSÃO 06","BOSS / FINALE"]
+];
+let selected=0;const list=document.querySelector("#missions");
+function render(){list.innerHTML="";missions.forEach((m,i)=>{const b=document.createElement("button");b.className="mission"+(i===selected?" active":"");b.innerHTML="<span>"+String(i+1).padStart(2,"0")+"</span>"+m[0];b.onclick=()=>{selected=i;document.querySelector("#status").textContent="";render()};list.appendChild(b)});const m=missions[selected];document.querySelector("#selected").textContent=m[0];document.querySelector("#freq").textContent=m[1]+" BPM";document.querySelector("#desc").textContent=m[2];document.querySelector("#difficulty").textContent=m[3];document.querySelector("#identity").textContent=m[4]}
+document.querySelector("#send").onclick=()=>{document.querySelector("#status").textContent="DOSSIÊ ABERTO // Integração com o jogo prevista para uma compilação futura."};render();
+</script>
+</body>
+</html>
