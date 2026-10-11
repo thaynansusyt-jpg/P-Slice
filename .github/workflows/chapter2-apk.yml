@@ -22,6 +22,29 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: false
+      - name: Verify final Chapter 2 PLUS content before native compile
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path("mods/tankman-chapter-2")
+          songs=["redeploy","blackout","onslaught","warzone",
+                 "last-stand","no-more-heroes","ugh-radio-remix"]
+          for slug in songs:
+              for item in ("Inst.ogg","Voices.ogg"):
+                  file=root/"songs"/slug/item
+                  assert file.is_file() and file.stat().st_size>10000, file
+              for difficulty in ("easy","normal","hard"):
+                  suffix="" if difficulty=="normal" else "-"+difficulty
+                  path=root/"data"/slug/(slug+suffix+".json")
+                  chart=json.loads(path.read_text())
+                  assert chart["needsVoices"], path
+                  assert len(chart["notes"])>=40, path
+          assert (root/"scripts"/"chapter2-mission-feed.lua").is_file()
+          week=json.loads((root/"weeks"/"tankman-chapter-2.json").read_text())
+          assert len(week["songs"])==7, "WAR ROOM not configured for 7 missions"
+          print("PASS: all 7 PLUS songs, 7 vocal stems, 21 charts and mission script present")
+          PY
       - name: Set up Haxe 4.3.6
         uses: krdlab/setup-haxe@master
         with:
