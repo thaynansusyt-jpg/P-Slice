@@ -53,6 +53,15 @@
         115,
         24
       ]
+    ],
+    [
+      "Ugh: Radio Remix",
+      "tankman",
+      [
+        255,
+        125,
+        55
+      ]
     ]
   ],
   "hideFreeplay": false,
@@ -62,7 +71,7 @@
     "bf",
     "gf"
   ],
-  "storyName": "REINFORCEMENTS ARRIVE",
+  "storyName": "CHAPTER 2 // WAR ROOM SIGNAL",
   "difficulties": "Easy,Normal,Hard",
   "weekName": "Tankman Chapter 2",
   "hideStoryMode": false,
