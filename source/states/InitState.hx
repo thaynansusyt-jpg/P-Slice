@@ -154,12 +154,15 @@ class InitState extends MusicBeatState
 			var root = StorageUtil.getStorageDirectory();
 			var assets = Assets.list();
 			var written = 0;
+            var bundleVersion='chapter2-plus-0.3.0-20261011';
+            var versionFile=root+'chapter2-bundle-version.txt';
+            var updateBundle=!FileSystem.exists(versionFile) || File.getContent(versionFile)!=bundleVersion;
 			for (assetPath in assets)
 			{
 				if (!assetPath.startsWith(assetPrefix) || assetPath.endsWith('/'))
 					continue;
 				var destination = root + assetPath;
-				if (!FileSystem.exists(destination))
+				if (updateBundle || !FileSystem.exists(destination))
 				{
 					var data = Assets.getBytes(assetPath);
 					if (data == null)
@@ -178,7 +181,8 @@ class InitState extends MusicBeatState
 					current = current.split('tankman-chapter-2|0').join('');
 					File.saveContent(listing, 'tankman-chapter-2|1' + (current.trim().length > 0 ? '\n' + current.trim() : ''));
 				}
-				Mods.updatedOnState = false;
+				File.saveContent(versionFile,bundleVersion);
+                Mods.updatedOnState = false;
 				Mods.pushGlobalMods();
 				Mods.loadTopMod();
 				trace('CHAPTER2_MOD_READY: ' + written + ' files extracted in app-private storage');

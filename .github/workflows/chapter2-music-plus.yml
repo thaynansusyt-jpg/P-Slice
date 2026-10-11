@@ -1,11 +1,6 @@
 name: Chapter 2 PLUS Music Pack (No Android Build)
 
 on:
-  push:
-    branches: [friday-night-funkin-vs-tankman-chapter-2]
-    paths:
-      - 'tools/chapter2_music_plus.py'
-      - '.github/workflows/chapter2-music-plus.yml'
   workflow_dispatch:
 
 permissions:
@@ -80,22 +75,3 @@ jobs:
           path: chapter2-plus-preview.zip
           if-no-files-found: error
           retention-days: 30
-      - name: Update music and charts in repository without building APK
-        run: |
-          set -euo pipefail
-          cp -a preview/tankman-chapter-2/data/. mods/tankman-chapter-2/data/
-          cp -a preview/tankman-chapter-2/songs/. mods/tankman-chapter-2/songs/
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add mods/tankman-chapter-2/data mods/tankman-chapter-2/songs
-          if git diff --cached --quiet; then
-            echo "All Chapter 2 PLUS assets are already current."
-          else
-            git commit -m "assets(chapter2): seven PLUS songs with BF/Tankman synced vocal prototypes [skip ci]"
-            # Changes to Haxe/menu may land while music is rendering.
-            # Rebase the binary-asset-only commit over the current branch head.
-            git fetch origin friday-night-funkin-vs-tankman-chapter-2
-            git rebase origin/friday-night-funkin-vs-tankman-chapter-2
-            git push origin HEAD:friday-night-funkin-vs-tankman-chapter-2
-          fi
-          echo "No Project.xml or source files touched; Android APK workflow not triggered."

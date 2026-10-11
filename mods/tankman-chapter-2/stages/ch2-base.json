@@ -1,10 +1,10 @@
 {
   "directory": "",
-  "defaultZoom": 0.85,
+  "defaultZoom": 0.78,
   "stageUI": "normal",
   "boyfriend": [
     860,
-    170
+    -2
   ],
   "girlfriend": [
     450,
@@ -12,14 +12,14 @@
   ],
   "opponent": [
     170,
-    145
+    -53
   ],
   "camera_boyfriend": [
-    0,
+    -80,
     0
   ],
   "camera_opponent": [
-    0,
+    80,
     0
   ],
   "_editorMeta": {

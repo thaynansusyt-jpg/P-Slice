@@ -86,7 +86,10 @@ jobs:
           assert template.is_file(), f"Unexpected Lime version or missing template: {template}"
           content=template.read_text()
           needle="firebaseCrashlytics {"
-          assert content.count(needle)==1, "Unexpected Gradle template format - stop safely"
+          assert content.count(needle)<=1, "Unexpected Gradle template format - stop safely"
+          if needle not in content:
+              print("Lime template already patched")
+              raise SystemExit(0)
           start=content.index(needle)
           pos=content.index("{",start)
           depth=1
@@ -126,6 +129,11 @@ jobs:
           save-always: true
       - name: Build optimized Android release binary
         run: haxelib run lime build android -release
+      - name: Restore stable playtest signing key
+        uses: actions/cache@v4
+        with:
+          path: .chapter2-signing/
+          key: chapter2-playtest-signing-v1
       - name: Sign optimized standalone APK for Android installation
         run: |
           set -euo pipefail
@@ -133,12 +141,15 @@ jobs:
           apk="$(find export/release -type f -name '*.apk' -print -quit)"
           test -n "$apk"
           echo "Unsigned/generated APK: $apk"
-          keytool -genkeypair -noprompt -keystore "$RUNNER_TEMP/ch2-playtest.jks" \
+          mkdir -p .chapter2-signing
+          if [ ! -f .chapter2-signing/ch2-playtest.jks ]; then
+          keytool -genkeypair -noprompt -keystore .chapter2-signing/ch2-playtest.jks \
             -storepass android -keypass android -alias chapter2 -keyalg RSA \
             -keysize 2048 -validity 3650 -dname "CN=Tankman Chapter 2 Playtest, O=Community"
+          fi
           build_tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
           "$build_tools/zipalign" -f -p 4 "$apk" chapter2-apk/TankmanChapter2-aligned.apk
-          "$build_tools/apksigner" sign --ks "$RUNNER_TEMP/ch2-playtest.jks" \
+          "$build_tools/apksigner" sign --ks .chapter2-signing/ch2-playtest.jks \
             --ks-key-alias chapter2 --ks-pass pass:android --key-pass pass:android \
             --out chapter2-apk/TankmanChapter2-Otimizado.apk chapter2-apk/TankmanChapter2-aligned.apk
           rm chapter2-apk/TankmanChapter2-aligned.apk

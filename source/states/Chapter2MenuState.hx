@@ -14,13 +14,16 @@ import mikolka.vslice.ui.MainMenuState;
  */
 class Chapter2MenuState extends MusicBeatState
 {
-    var titles:Array<String> = ["REDEPLOY", "BLACKOUT", "ONSLAUGHT", "WARZONE", "LAST STAND", "NO MORE HEROES", "UGH: RADIO REMIX"];
+    var titles:Array<String> = ["REDEPLOY", "BLACKOUT", "ONSLAUGHT", "WARZONE", "LAST STAND", "NO MORE HEROES", "UGH RADIO REMIX"];
     var slugs:Array<String> = ["redeploy", "blackout", "onslaught", "warzone", "last-stand", "no-more-heroes", "ugh-radio-remix"];
     var bpms:Array<Int> = [140, 155, 165, 170, 180, 190, 160];
     var briefings:Array<String> = ["ARRIVAL / REINFORCEMENTS", "SIGNAL LOST / NIGHT", "CONTACT / ESCALATION", "STATIC / COLLISION", "FINAL DEFENSE / RESOLVE", "LAST SIGNAL / FINALE", "RADIO REMIX / BONUS FILE"];
     var rows:Array<FlxSprite> = [];
     var labels:Array<FlxText> = [];
     var selected:Int = 0;
+    var difficulty:Int = 1;
+    var difficultyPanel:FlxSprite;
+    var difficultyLabel:FlxText;
     var details:FlxText;
     var status:FlxText;
     var playPanel:FlxSprite;
@@ -82,7 +85,9 @@ class Chapter2MenuState extends MusicBeatState
         rectAt(sideX,top,w*.33,h*.48,0xD9181B27);
         rectAt(sideX,top,w*.33,4,0xFFFF7029);
         textAt(sideX+w*.02,top+h*.035,w*.27,"MISSION BRIEFING",Std.int(Math.max(15,w*.020)),0xFFFFA352);
-        details=textAt(sideX+w*.02,top+h*.122,w*.29,"",Std.int(Math.max(15,w*.021)),FlxColor.WHITE);
+        details=textAt(sideX+w*.02,top+h*.102,w*.29,"",Std.int(Math.max(15,w*.018)),FlxColor.WHITE);
+        difficultyPanel=rectAt(sideX+w*.016,top+h*.245,w*.29,h*.052,0xFF303542);
+        difficultyLabel=textAt(sideX+w*.027,top+h*.252,w*.27,"",Std.int(Math.max(15,w*.017)),FlxColor.WHITE);
 
         playPanel=rectAt(sideX+w*.016,top+h*.305,w*.29,h*.075,0xFFB94F20);
         textAt(sideX+w*.034,top+h*.319,w*.26,"START MISSION / PLAY",Std.int(Math.max(16,w*.018)),FlxColor.WHITE);
@@ -92,7 +97,7 @@ class Chapter2MenuState extends MusicBeatState
         refresh();
 
         #if TOUCH_CONTROLS_ALLOWED
-        addTouchPad('UP_DOWN','A_B');
+        addTouchPad('NONE','B');
         #end
         #if CHAPTER2_STANDALONE
         try
@@ -115,7 +120,15 @@ class Chapter2MenuState extends MusicBeatState
             rows[i].alpha=(i==selected) ? 1 : .83;
             labels[i].color=(i==selected) ? 0xFFFFFFFF : 0xFFDFE3EE;
         }
-        details.text="FILE 0"+(selected+1)+" / 0"+titles.length+"\n\n"+titles[selected]+"\n"+briefings[selected]+"\n"+bpms[selected]+" BPM\n\nBF vs TANKMAN";
+        details.text=titles[selected]+"\n"+briefings[selected]+"\n"+bpms[selected]+" BPM / BF vs TANKMAN";
+        difficultyLabel.text="< "+["EASY", "NORMAL", "HARD"][difficulty]+" > / TAP";
+    }
+
+    function changeDifficulty(delta:Int):Void
+    {
+        difficulty=(difficulty+delta+3)%3;
+        FlxG.sound.play(Paths.sound('scrollMenu'));
+        refresh();
     }
 
     function shift(delta:Int):Void
@@ -137,13 +150,14 @@ class Chapter2MenuState extends MusicBeatState
         for (touch in FlxG.touches.list)
         {
             if (!touch.justPressed) continue;
+            if (touch.overlaps(difficultyPanel)) { changeDifficulty(1); return; }
             if (touch.overlaps(playPanel)) { launch(); return; }
             if (touch.overlaps(backPanel)) { exitMenu(); return; }
             for (i in 0...rows.length)
             {
                 if (touch.overlaps(rows[i]))
                 {
-                    if (selected==i) launch(); else {selected=i;refresh();}
+                    selected=i;refresh();
                     return;
                 }
             }
@@ -151,12 +165,13 @@ class Chapter2MenuState extends MusicBeatState
         #else
         if (FlxG.mouse.justPressed)
         {
+            if (FlxG.mouse.overlaps(difficultyPanel)) {changeDifficulty(1);return;}
             if (FlxG.mouse.overlaps(playPanel)) {launch();return;}
             if (FlxG.mouse.overlaps(backPanel)) {exitMenu();return;}
             for (i in 0...rows.length)
                 if (FlxG.mouse.overlaps(rows[i]))
                 {
-                    if (selected==i) launch(); else {selected=i;refresh();}
+                    selected=i;refresh();
                     return;
                 }
         }
@@ -170,6 +185,8 @@ class Chapter2MenuState extends MusicBeatState
         #end
         if(!busy)
         {
+            if(controls.UI_LEFT_P) changeDifficulty(-1);
+            if(controls.UI_RIGHT_P) changeDifficulty(1);
             if(controls.UI_UP_P) shift(-1);
             if(controls.UI_DOWN_P) shift(1);
             if(controls.BACK) exitMenu();
@@ -192,14 +209,19 @@ class Chapter2MenuState extends MusicBeatState
         }
         WeekData.setDirectoryFromWeek(WeekData.weeksLoaded.get(key));
         PlayState.storyWeek=week;
-        PlayState.storyDifficulty=1;
+        backend.Difficulty.loadFromWeek(WeekData.weeksLoaded.get(key));
+        PlayState.storyDifficulty=difficulty;
         PlayState.storyPlaylist=[titles[selected]];
-        PlayState.SONG=Song.loadFromJson(slugs[selected],slugs[selected]);
-        if(PlayState.SONG==null)
+        var chartName=slugs[selected]+backend.Difficulty.getFilePath(difficulty);
+        var chart:backend.Song.SwagSong=null;
+        try { chart=Song.getChart(chartName,slugs[selected]); }
+        catch (error:Dynamic) { status.text="CHART ERROR: "+Std.string(error); return; }
+        if(chart==null)
         {
             status.text="CHART MISSING! CHECK THE INSTALLED MOD FILES.";
             return;
         }
+        PlayState.SONG=Song.loadFromJson(chartName,slugs[selected]);
         busy=true;
         FlxG.sound.play(Paths.sound('confirmMenu'));
         LoadingState.loadAndSwitchState(new PlayState(),true);

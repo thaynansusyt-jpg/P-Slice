@@ -3,8 +3,8 @@
   "albumId": "volume1",
   "freeplayCharacter": "",
   "freeplayWeekName": "Tankman Chapter 2",
-  "freeplaySongLength": 73,
-  "freeplayPrevStart": 0,
-  "freeplayPrevEnd": 18,
+  "freeplaySongLength": 86,
+  "freeplayPrevStart": 10,
+  "freeplayPrevEnd": 28,
   "allowErectVariants": false
 }

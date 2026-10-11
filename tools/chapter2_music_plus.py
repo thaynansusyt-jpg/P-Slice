@@ -145,7 +145,7 @@ def make_chart(name, bpm, bars, events, difficulty, style):
             # Psych format: lanes 0..3 belong to mustHitSection side,
             # 4..7 to the other side. Shift per phrase for a call/response.
             owner_is_player = (bar%8>=4) if slot<4 else (bar%8<4)
-            col = lane + (0 if owner_is_player == player_side else 4)
+            col = lane + (0 if owner_is_player else 4)
             notes.append([round(beat*60000/bpm,3),col,0])
             total_notes+=1
         sections.append({"sectionBeats":4,"sectionNotes":notes,

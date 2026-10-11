@@ -266,7 +266,12 @@ class ClientPrefs {
 		}
 		#end
 
-		if(data.framerate > FlxG.drawFramerate)
+		#if CHAPTER2_STANDALONE
+        data.framerate=Std.int(FlxMath.bound(data.framerate,30,60));
+        data.showFPS=false;
+        data.showFPSOpacity=0;
+        #end
+        if(data.framerate > FlxG.drawFramerate)
 		{
 			FlxG.updateFramerate = data.framerate;
 			FlxG.drawFramerate = data.framerate;

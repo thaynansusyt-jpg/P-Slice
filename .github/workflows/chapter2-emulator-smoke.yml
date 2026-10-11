@@ -2,11 +2,6 @@ name: Chapter 2 Android Emulator Smoke Test
 # Emulator-only CI. Changes to this workflow or the smoke script reuse
 # an existing signed APK; they never trigger a native Haxe/C++ rebuild.
 on:
-  push:
-    branches: [friday-night-funkin-vs-tankman-chapter-2]
-    paths:
-      - 'tools/chapter2_emulator_smoke.sh'
-      - '.github/workflows/chapter2-emulator-smoke.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,7 +18,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p smoke-apk
-          RUN_ID="38095402941" # Existing Android 15 release artifact
+          RUN_ID="$(gh run list -R "$GITHUB_REPOSITORY" --workflow chapter2-apk.yml --branch friday-night-funkin-vs-tankman-chapter-2 --status success --limit 1 --json databaseId --jq '.[0].databaseId')"
           test -n "$RUN_ID" && test "$RUN_ID" != "null"
           echo "Using fully successful APK workflow run #$RUN_ID"
           gh run download "$RUN_ID" -R "$GITHUB_REPOSITORY" -n Vs-Tankman-Chapter2-Android-APK -D smoke-apk

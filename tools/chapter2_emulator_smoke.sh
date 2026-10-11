@@ -12,8 +12,9 @@ adb install -r -g "$APK" 2>&1 | tee smoke-results/install.txt
 adb shell pm list packages | grep -F "$APP" | tee smoke-results/package.txt
 READY_MARKER="/sdcard/Android/data/$APP/files/chapter2-main-menu-ready.marker"
 TRACK_MARKER="/sdcard/Android/data/$APP/files/chapter2-track-menu-ready.marker"
+SONG_MARKER="/sdcard/Android/data/$APP/files/chapter2-song-started.marker"
 # Never accept leftover markers from a previous attempt on an existing emulator.
-adb shell rm -f "$READY_MARKER" "$TRACK_MARKER" 2>/dev/null || true
+adb shell rm -f "$READY_MARKER" "$TRACK_MARKER" "$SONG_MARKER" 2>/dev/null || true
 adb logcat -c
 # Stream logs while emulator is connected; Android test infrastructure may
 # disconnect from ADB during Vulkan graphics initialization.
@@ -145,4 +146,8 @@ if grep -q "CHAPTER2_MOD_WARNING" smoke-results/logcat.txt; then
   echo "FAIL: Embedded Chapter 2 mod files were not available on startup" | tee smoke-results/status.txt
   exit 1
 fi
-echo "PASS: APK installed, survived, and reached the interactive main menu on Android 15. Chapter 2 track menu and complete songs not yet verified." | tee smoke-results/status.txt
+if ! adb shell test -f "$TRACK_MARKER" || ! adb shell test -f "$SONG_MARKER"; then
+  echo "FAIL: Track selection or actual song startup was not confirmed" | tee smoke-results/status.txt
+  exit 1
+fi
+echo "PASS: Android 15 installation, main menu, War Room and first-song startup confirmed. Full campaign and real-phone performance still require playtesting." | tee smoke-results/status.txt

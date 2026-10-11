@@ -1393,6 +1393,10 @@ class PlayState extends MusicBeatState
 	function startSong():Void
 	{
 		startingSong = false;
+        #if CHAPTER2_STANDALONE
+        try { File.saveContent(StorageUtil.getStorageDirectory()+'chapter2-song-started.marker',songName); }
+        catch (error:Dynamic) { trace('CHAPTER2_GAMEPLAY_MARKER_ERROR: '+Std.string(error)); }
+        #end
 
 		@:privateAccess
 		FlxG.sound.playMusic(inst._sound, 1, false);
@@ -1966,6 +1970,7 @@ override public function update(elapsed:Float)
 		}
 	}
 
+	#if !CHAPTER2_STANDALONE
 	if (!endingSong && !inCutscene && allowDebugKeys)
 	{
 		if (controls.justPressed('debug_1'))
@@ -1974,6 +1979,7 @@ override public function update(elapsed:Float)
 			openCharacterEditor();
 	}
 
+	#end
 	if (healthBar.bounds.max != null && health > healthBar.bounds.max)
 		health = healthBar.bounds.max;
 

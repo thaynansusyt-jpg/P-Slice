@@ -40,16 +40,17 @@ def ogg_from_audio(audio):
     return proc.stdout
 
 
-def speaker(section,note):
+def speaker(section,note,legacy=False):
     lane=int(note[1])
-    return "bf" if ((lane<4)==bool(section.get("mustHitSection",False))) else "tankman"
+    player = ((lane<4)==bool(section.get("mustHitSection",False))) if legacy else lane<4
+    return "bf" if player else "tankman"
 
 
-def notes(chart):
+def notes(chart,legacy=False):
     for section in chart["notes"]:
         for n in section["sectionNotes"]:
             if len(n)>=3:
-                yield float(n[0])/1000,speaker(section,n),int(n[1])%4
+                yield float(n[0])/1000,speaker(section,n,legacy),int(n[1])%4
 
 
 def build_bank(source_zip):
@@ -63,7 +64,7 @@ def build_bank(source_zip):
             if vf not in names or jf not in names: continue
             data=audio_from_ogg(z.read(vf))
             chart=json.loads(z.read(jf))
-            for t,singer,lane in notes(chart):
+            for t,singer,lane in notes(chart,legacy=True):
                 start=int((t+.02)*RATE); end=start+int(.155*RATE)
                 if end>len(data): continue
                 sample=data[start:end].copy()

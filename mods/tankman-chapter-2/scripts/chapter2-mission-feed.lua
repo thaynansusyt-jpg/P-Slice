@@ -13,17 +13,17 @@ local mission = 'CHAPTER 2 / LIVE FEED'
 local active = false
 
 function onCreatePost()
-    local song = string.lower(songName or '')
+    local song = string.gsub(string.lower(songName or ''), ' ', '-')
     mission = missions[song] or mission
-    makeLuaText('ch2Mission', 'WAR ROOM // '..mission, 680, 12, 22)
-    setTextSize('ch2Mission', 15)
+    makeLuaText('ch2Mission', 'WAR ROOM // '..mission, 680, 12, 6)
+    setTextSize('ch2Mission', 12)
     setTextColor('ch2Mission', 'FBA268')
     setObjectCamera('ch2Mission', 'hud')
     setProperty('ch2Mission.alpha', 0.82)
     addLuaText('ch2Mission')
 
-    makeLuaText('ch2Transmission', 'SIGNAL ONLINE', 250, 12, 46)
-    setTextSize('ch2Transmission', 12)
+    makeLuaText('ch2Transmission', 'SIGNAL ONLINE', 250, 12, 24)
+    setTextSize('ch2Transmission', 10)
     setTextColor('ch2Transmission', 'E4E9D4')
     setObjectCamera('ch2Transmission', 'hud')
     setProperty('ch2Transmission.alpha', 0.55)
