@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   compose:
-    name: Generate 6 instrumentals, 18 charts, War Room preview
+    name: Generate 7 instrumentals, 21 charts, War Room preview
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
@@ -45,7 +45,7 @@ jobs:
           import json
           from pathlib import Path
           root=Path("preview/tankman-chapter-2")
-          slugs=["redeploy","blackout","onslaught","warzone","last-stand","no-more-heroes"]
+          slugs=["redeploy","blackout","onslaught","warzone","last-stand","no-more-heroes","ugh-radio-remix"]
           songhash=[]
           for slug in slugs:
               audio=root/"songs"/slug/"Inst.ogg"
@@ -58,15 +58,15 @@ jobs:
                   assert sum(len(s["sectionNotes"]) for s in chart["notes"])>60
                   assert all(len(n)==3 and n[1]>=0 and n[1]<=7 for s in chart["notes"] for n in s["sectionNotes"])
               print("VALIDATED",slug,audio.stat().st_size,"bytes")
-          assert len(set(songhash))==6,"Music files are duplicated"
-          print("PASS: 6 unique OGG instrumentals; all 18 charts structurally valid")
+          assert len(set(songhash))==7,"Music files are duplicated"
+          print("PASS: 7 unique OGG instrumentals; all 21 charts structurally valid")
           PY
       - name: Prepare a complete mod-only ZIP
         run: |
           cp docs/chapter2-war-room.html preview/WAR-ROOM-prototype.html
           printf '%s\n' \
             'CHAPTER 2 PLUS // PREVIEW, not a new APK' \
-            'This ZIP contains a full six-song mod pack with original instrumentals.' \
+            'This ZIP contains a full seven-song mod pack with original instrumentals.' \
             'The War Room HTML is a concept prototype, not yet wired into the Android app.' \
             'Existing installed APKs do not update automatically. New native build is NOT performed.' \
             'No commercial Ugh composition or official song audio is included.' \
