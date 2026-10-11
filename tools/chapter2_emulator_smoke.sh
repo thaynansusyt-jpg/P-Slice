@@ -71,6 +71,40 @@ for attempt in $(seq 1 12); do
 done
 adb exec-out screencap -p > smoke-results/after-warning.png || true
 adb exec-out screencap -p > smoke-results/after-menu.png || true
+
+# Visual integration test of the full custom Chapter 2 flow.
+# Runs against an existing APK and does NOT recompile Android/Haxe.
+if adb shell test -f "$READY_MARKER" 2>/dev/null; then
+  echo "Entering TANKMAN CHAPTER 2 from the main menu"
+  adb shell input tap 1640 170 >/dev/null 2>&1 || true
+  for attempt in $(seq 1 12); do
+    if adb shell test -f "$TRACK_MARKER" 2>/dev/null; then
+      echo "CHAPTER2_TRACK_MENU_READY confirmed on attempt $attempt"
+      break
+    fi
+    sleep 4
+    if (( attempt % 3 == 0 )); then
+      adb shell input tap 1640 170 >/dev/null 2>&1 || true
+    fi
+  done
+  adb exec-out screencap -p > smoke-results/chapter2-track-selection.png || true
+  if adb shell test -f "$TRACK_MARKER" 2>/dev/null; then
+    echo "Attempting to play REDEPLOY (first selected track)"
+    # First list row / large Play button; preserve screenshot evidence
+    # and crash logs even if the song transitions or freezes.
+    adb shell input tap 1670 645 >/dev/null 2>&1 || true
+    sleep 30
+    adb exec-out screencap -p > smoke-results/redeploy-after-30s.png || true
+    sleep 30
+    adb exec-out screencap -p > smoke-results/redeploy-after-60s.png || true
+    echo "REDEPLOY_GAMEPLAY_ATTEMPT: screenshots captured; image review required."
+  else
+    echo "WARN: Could not reach custom track selector; check chapter2-track-selection.png."
+  fi
+else
+  echo "WARN: Main menu not reached, skipping track and song inputs."
+fi
+
 adb shell dumpsys activity top > smoke-results/activity-top.txt || true
 # ADB sometimes goes offline in nested Android/ARM emulation under GitHub CI.
 # Distinguish this infrastructure failure from the app actually dying.
