@@ -14,9 +14,10 @@ import mikolka.vslice.ui.MainMenuState;
  */
 class Chapter2MenuState extends MusicBeatState
 {
-    var titles:Array<String> = ["REDEPLOY", "BLACKOUT", "ONSLAUGHT", "WARZONE", "LAST STAND", "NO MORE HEROES"];
-    var slugs:Array<String> = ["redeploy", "blackout", "onslaught", "warzone", "last-stand", "no-more-heroes"];
-    var bpms:Array<Int> = [140, 155, 165, 170, 180, 190];
+    var titles:Array<String> = ["REDEPLOY", "BLACKOUT", "ONSLAUGHT", "WARZONE", "LAST STAND", "NO MORE HEROES", "UGH: RADIO REMIX"];
+    var slugs:Array<String> = ["redeploy", "blackout", "onslaught", "warzone", "last-stand", "no-more-heroes", "ugh-radio-remix"];
+    var bpms:Array<Int> = [140, 155, 165, 170, 180, 190, 160];
+    var briefings:Array<String> = ["ARRIVAL / REINFORCEMENTS", "SIGNAL LOST / NIGHT", "CONTACT / ESCALATION", "STATIC / COLLISION", "FINAL DEFENSE / RESOLVE", "LAST SIGNAL / FINALE", "RADIO REMIX / BONUS FILE"];
     var rows:Array<FlxSprite> = [];
     var labels:Array<FlxText> = [];
     var selected:Int = 0;
@@ -59,12 +60,12 @@ class Chapter2MenuState extends MusicBeatState
         rectAt(w*.055,h*.045,w*.89,h*.16,0xD90F121C);
         rectAt(w*.055,h*.202,w*.89,4,0xFFFF7029);
         var headingSize = Std.int(Math.max(25,Math.min(54,w*.044)));
-        textAt(w*.075,h*.065,w*.83,"TANKMAN // CHAPTER 2",headingSize,0xFFFFC6A0);
-        textAt(w*.075,h*.145,w*.80,"RADIO NETWORK   •   SIGNAL RESTORED",Std.int(Math.max(13,w*.016)),FlxColor.WHITE);
+        textAt(w*.075,h*.065,w*.83,"TANKMAN // WAR ROOM",headingSize,0xFFFFC6A0);
+        textAt(w*.075,h*.145,w*.80,"CHAPTER 2 // COMMAND CENTER // CHOOSE AN OPERATION",Std.int(Math.max(13,w*.016)),FlxColor.WHITE);
 
-        var top:Float=h*.265;
-        var gap:Float=h*.011;
-        var rowHeight:Float=Math.min(h*.077,60);
+        var top:Float=h*.253;
+        var gap:Float=h*.010;
+        var rowHeight:Float=Math.min(h*.063,54);
         var rowWidth:Float=w*.49;
         var fontSize:Int=Std.int(Math.max(18,Math.min(30,w*.022)));
         for (i in 0...titles.length)
@@ -80,11 +81,11 @@ class Chapter2MenuState extends MusicBeatState
         var sideX=w*.60;
         rectAt(sideX,top,w*.33,h*.48,0xD9181B27);
         rectAt(sideX,top,w*.33,4,0xFFFF7029);
-        textAt(sideX+w*.02,top+h*.035,w*.27,"NOW TRANSMITTING",Std.int(Math.max(15,w*.020)),0xFFFFA352);
+        textAt(sideX+w*.02,top+h*.035,w*.27,"MISSION BRIEFING",Std.int(Math.max(15,w*.020)),0xFFFFA352);
         details=textAt(sideX+w*.02,top+h*.122,w*.29,"",Std.int(Math.max(15,w*.021)),FlxColor.WHITE);
 
         playPanel=rectAt(sideX+w*.016,top+h*.305,w*.29,h*.075,0xFFB94F20);
-        textAt(sideX+w*.034,top+h*.319,w*.26,"PLAY SELECTED TRACK",Std.int(Math.max(16,w*.018)),FlxColor.WHITE);
+        textAt(sideX+w*.034,top+h*.319,w*.26,"START MISSION / PLAY",Std.int(Math.max(16,w*.018)),FlxColor.WHITE);
         backPanel=rectAt(sideX+w*.016,top+h*.39,w*.29,h*.065,0xFF303542);
         textAt(sideX+w*.034,top+h*.401,w*.26,"RETURN TO MENU",Std.int(Math.max(15,w*.017)),FlxColor.WHITE);
         status=textAt(w*.075,h*.865,w*.83,"UP/DOWN: SELECT     ACCEPT/A: PLAY     BACK/B: EXIT",Std.int(Math.max(13,w*.014)),FlxColor.WHITE);
@@ -114,7 +115,7 @@ class Chapter2MenuState extends MusicBeatState
             rows[i].alpha=(i==selected) ? 1 : .83;
             labels[i].color=(i==selected) ? 0xFFFFFFFF : 0xFFDFE3EE;
         }
-        details.text="FILE 0"+(selected+1)+" / 06\n\n"+titles[selected]+"\n"+bpms[selected]+" BPM\n\nBF vs TANKMAN\n\n[TEST BUILD]";
+        details.text="FILE 0"+(selected+1)+" / 0"+titles.length+"\n\n"+titles[selected]+"\n"+briefings[selected]+"\n"+bpms[selected]+" BPM\n\nBF vs TANKMAN";
     }
 
     function shift(delta:Int):Void
