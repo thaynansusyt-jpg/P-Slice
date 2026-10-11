@@ -49,7 +49,15 @@ def tone(buf, start, dur, midi, level, voice):
     t = np.arange(n, dtype=np.float32) / RATE
     f = 440 * 2 ** ((midi - 69) / 12)
     phase = (t * f) % 1
-    if voice == "brass":
+    if voice == "bf":
+        # Higher, bright vocal-formant prototype. User's private DWP addon
+        # supplies the authentic sampler-based voice alternative.
+        vibrato = np.sin(2*np.pi*5.3*t) * .018
+        signal = .64*np.sin(2*np.pi*f*t + vibrato) + .25*np.sin(4*np.pi*f*t) + .11*np.sin(6*np.pi*f*t)
+    elif voice == "tankman":
+        # Lower, nasal/brassy response timbre: clearly different from BF.
+        signal = .50*np.sin(2*np.pi*f*t) + .34*np.sin(3*np.pi*f*t) + .16*np.sign(np.sin(2*np.pi*f*t))
+    elif voice == "brass":
         signal = .60 * np.sin(2*np.pi*f*t) + .28 * np.sin(4*np.pi*f*t) + .12*np.sin(6*np.pi*f*t)
     elif voice == "pulse":
         signal = np.where(phase < .24, .85, -.38).astype(np.float32)
@@ -142,12 +150,36 @@ def make_chart(name, bpm, bars, events, difficulty, style):
             total_notes+=1
         sections.append({"sectionBeats":4,"sectionNotes":notes,
                          "mustHitSection":player_side,"changeBPM":False,"bpm":bpm})
-    return {"song":name,"notes":sections,"events":[],"bpm":bpm,"needsVoices":False,
+    return {"song":name,"notes":sections,"events":[],"bpm":bpm,"needsVoices":True,
             "speed": {"easy":1.30,"normal":1.54,"hard":1.85}[difficulty],
             "offset":0,"player1":"bf","player2":"tankman","gfVersion":"gf",
             "stage":"ch2-base","format":"psych_v1",
             "artist":"Chapter 2 PLUS — original instrumental prototype",
             "charter":"Chapter 2 PLUS synchronized generator"}
+
+
+def render_vocals(events, bpm, seconds, out_file):
+    """Synth fallback, aligned to the same authored song notes as the charts.
+
+    This is deliberately NOT represented as the user's original DWP samples.
+    An optional DWP-derived replacement can overwrite Voices.ogg later.
+    """
+    voice_audio=np.zeros(int(seconds*RATE),dtype=np.float32)
+    beat=60.0/bpm
+    for at,pitch,bar,slot in events:
+        player = (bar%8>=4) if slot<4 else (bar%8<4)
+        voice = "bf" if player else "tankman"
+        singer_note=pitch+(0 if player else -12)
+        tone(voice_audio,at*beat,beat*.39,singer_note,.105 if player else .095,voice)
+    peak=float(np.max(np.abs(voice_audio)))
+    if peak>0: voice_audio=np.tanh(voice_audio/max(.8,peak)*1.12)*.72
+    with tempfile.TemporaryDirectory() as td:
+        wav=Path(td)/"voice.wav"
+        with wave.open(str(wav),"wb") as f:
+            f.setnchannels(1);f.setsampwidth(2);f.setframerate(RATE)
+            f.writeframes(np.int16(np.clip(voice_audio,-1,1)*32767).tobytes())
+        subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y",
+                        "-i",str(wav),"-c:a","libvorbis","-q:a","4",str(out_file)],check=True)
 
 
 def render_track(profile, out):
@@ -211,6 +243,7 @@ def render_track(profile, out):
             f.writeframes(np.int16(np.clip(audio,-1,1)*32767).tobytes())
         subprocess.run(["ffmpeg","-hide_banner","-loglevel","error","-y",
                         "-i",str(wav),"-c:a","libvorbis","-q:a","4",str(ogg)], check=True)
+    render_vocals(events,bpm,duration,directory/"Voices.ogg")
     for d in ("easy","normal","hard"):
         chart=make_chart(name,bpm,bars,events,d,style)
         folder=out/"data"/slug
@@ -231,11 +264,12 @@ def main():
     args=p.parse_args()
     args.out.mkdir(parents=True,exist_ok=True)
     for song in SONGS: render_track(song,args.out)
-    # Validates that every output contains real content and all 18 charts exist.
+    # Validate audio and charts without requiring private DWP sources.
     for _,slug,*_ in SONGS:
         assert (args.out/"songs"/slug/"Inst.ogg").stat().st_size>20000
+        assert (args.out/"songs"/slug/"Voices.ogg").stat().st_size>10000
         assert len(list((args.out/"data"/slug).glob("*.json")))==4
-    print("PASS: seven distinct original arrangements, 21 synchronized charts, seven metadata files.")
+    print("PASS: seven original arrangements, seven synced vocal-prototype stems, 21 charts, seven metadata files.")
 
 
 if __name__=="__main__":
