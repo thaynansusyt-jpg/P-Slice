@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Chapter 2 PLUS: six independently arranged ORIGINAL instrumental drafts.
+"""Chapter 2 PLUS: seven independently arranged ORIGINAL instrumental drafts.
 
 No commercial song melodies or Ugh MIDI note sequences are included. The
 user-provided 10-track MIDI informed the instrumentation and half-time groove.
@@ -34,6 +34,10 @@ SONGS = [
      [0, 7, 12, 15, 19, 15, 12, 7], [0, 5, 8, 3], "bell", "anthem"),
     ("No More Heroes", "no-more-heroes", 190, 64, 50,
      [0, 10, 7, 13, 12, 3, 7, 0], [0, -1, 5, 6], "boss", "finale"),
+    # Fan-original radio battle inspired by the instrumentation and half-time
+    # energy of the user's Ugh MIDI; NOT the original song's melody/audio.
+    ("Ugh: Radio Remix", "ugh-radio-remix", 160, 48, 38,
+     [0, 5, 10, 3, 8, 7, 12, 5], [0, -2, 3, 7], "brass", "half"),
 ]
 
 
@@ -231,7 +235,7 @@ def main():
     for _,slug,*_ in SONGS:
         assert (args.out/"songs"/slug/"Inst.ogg").stat().st_size>20000
         assert len(list((args.out/"data"/slug).glob("*.json")))==4
-    print("PASS: six distinct original arrangements, 18 synchronized charts, six metadata files.")
+    print("PASS: seven distinct original arrangements, 21 synchronized charts, seven metadata files.")
 
 
 if __name__=="__main__":
