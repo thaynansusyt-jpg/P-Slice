@@ -1,0 +1,95 @@
+name: Chapter 2 PLUS Music Pack (No Android Build)
+
+on:
+  push:
+    branches: [friday-night-funkin-vs-tankman-chapter-2]
+    paths:
+      - 'tools/chapter2_music_plus.py'
+      - '.github/workflows/chapter2-music-plus.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chapter2-music-plus
+  cancel-in-progress: true
+
+jobs:
+  compose:
+    name: Generate 6 instrumentals, 18 charts, War Room preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout existing mod assets (no Android SDK or Haxe)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          lfs: false
+      - name: Install just the music synthesis tools
+        run: |
+          python3 -m pip install --quiet numpy
+          ffmpeg -version | head -n 1
+      - name: Render six original arrangements
+        run: |
+          set -euo pipefail
+          mkdir -p preview
+          cp -a mods/tankman-chapter-2 preview/tankman-chapter-2
+          python3 tools/chapter2_music_plus.py --out preview/tankman-chapter-2
+      - name: Validate notes and unique song outputs
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          root=Path("preview/tankman-chapter-2")
+          slugs=["redeploy","blackout","onslaught","warzone","last-stand","no-more-heroes"]
+          songhash=[]
+          for slug in slugs:
+              audio=root/"songs"/slug/"Inst.ogg"
+              assert audio.is_file() and audio.stat().st_size>20000, audio
+              songhash.append(hashlib.sha256(audio.read_bytes()).hexdigest())
+              for difficulty in ("easy","normal","hard"):
+                  suffix="" if difficulty=="normal" else "-"+difficulty
+                  chart=json.loads((root/"data"/slug/(slug+suffix+".json")).read_text())
+                  assert chart["song"] and len(chart["notes"])>=48
+                  assert sum(len(s["sectionNotes"]) for s in chart["notes"])>60
+                  assert all(len(n)==3 and n[1]>=0 and n[1]<=7 for s in chart["notes"] for n in s["sectionNotes"])
+              print("VALIDATED",slug,audio.stat().st_size,"bytes")
+          assert len(set(songhash))==6,"Music files are duplicated"
+          print("PASS: 6 unique OGG instrumentals; all 18 charts structurally valid")
+          PY
+      - name: Prepare a complete mod-only ZIP
+        run: |
+          cp docs/chapter2-war-room.html preview/WAR-ROOM-prototype.html
+          printf '%s\n' \
+            'CHAPTER 2 PLUS // PREVIEW, not a new APK' \
+            'This ZIP contains a full six-song mod pack with original instrumentals.' \
+            'The War Room HTML is a concept prototype, not yet wired into the Android app.' \
+            'Existing installed APKs do not update automatically. New native build is NOT performed.' \
+            'No commercial Ugh composition or official song audio is included.' \
+            > preview/README-CHAPTER2-PLUS.txt
+          cd preview && zip -qr ../chapter2-plus-preview.zip tankman-chapter-2 WAR-ROOM-prototype.html README-CHAPTER2-PLUS.txt
+          ls -lh ../chapter2-plus-preview.zip
+      - name: Upload Chapter 2 PLUS package
+        uses: actions/upload-artifact@v4
+        with:
+          name: Chapter2-PLUS-Music-Charts-WarRoom-NoAPK
+          path: chapter2-plus-preview.zip
+          if-no-files-found: error
+          retention-days: 30
+      - name: Update music and charts in repository without building APK
+        run: |
+          set -euo pipefail
+          cp -a preview/tankman-chapter-2/data/. mods/tankman-chapter-2/data/
+          cp -a preview/tankman-chapter-2/songs/. mods/tankman-chapter-2/songs/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add mods/tankman-chapter-2/data mods/tankman-chapter-2/songs
+          if git diff --cached --quiet; then
+            echo "All Chapter 2 PLUS assets are already current."
+          else
+            git commit -m "assets(chapter2): six original PLUS instrumentals and rhythm-aligned charts [skip ci]"
+            git push origin HEAD:friday-night-funkin-vs-tankman-chapter-2
+          fi
+          echo "No Project.xml or source files touched; Android APK workflow not triggered."
