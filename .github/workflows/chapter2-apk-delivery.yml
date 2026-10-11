@@ -1,0 +1,59 @@
+name: Chapter 2 APK Delivery (No Compile)
+on:
+  push:
+    branches: [friday-night-funkin-vs-tankman-chapter-2]
+    paths: ['.github/workflows/chapter2-apk-delivery.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  delivery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Reuse the already signed PLUS 0.3.0 APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 38142104588 -R "$GITHUB_REPOSITORY" -n Vs-Tankman-Chapter2-Android-APK -D signed-apk
+      - name: Split delivery bytes without altering the APK
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          apk=next(Path('signed-apk').glob('*.apk'))
+          chunk_size=240*1024*1024
+          index=0; digest=hashlib.sha256(); size=0
+          while True:
+              with apk.open('rb') as source:
+                  source.seek(index*chunk_size); data=source.read(chunk_size)
+              if not data: break
+              digest.update(data);size+=len(data)
+              folder=Path('parts')/('part%02d'%index);folder.mkdir(parents=True,exist_ok=True)
+              (folder/('TankmanChapter2.apk.part%02d'%index)).write_bytes(data)
+              index+=1
+          report=dict(apk_name=apk.name,sha256=digest.hexdigest(),size_bytes=size,parts=index,source_run=38142104588)
+          Path('parts/manifest').mkdir(parents=True)
+          Path('parts/manifest/APK-SHA256.json').write_text(json.dumps(report,indent=2))
+          print(json.dumps(report))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Chapter2-APK-Part00
+          path: parts/part00/
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Chapter2-APK-Part01
+          path: parts/part01/
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Chapter2-APK-Part02
+          path: parts/part02/
+          compression-level: 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Chapter2-APK-Checksum
+          path: parts/manifest/
