@@ -91,7 +91,11 @@ jobs:
           if git diff --cached --quiet; then
             echo "All Chapter 2 PLUS assets are already current."
           else
-            git commit -m "assets(chapter2): six original PLUS instrumentals and rhythm-aligned charts [skip ci]"
+            git commit -m "assets(chapter2): seven PLUS songs with BF/Tankman synced vocal prototypes [skip ci]"
+            # Changes to Haxe/menu may land while music is rendering.
+            # Rebase the binary-asset-only commit over the current branch head.
+            git fetch origin friday-night-funkin-vs-tankman-chapter-2
+            git rebase origin/friday-night-funkin-vs-tankman-chapter-2
             git push origin HEAD:friday-night-funkin-vs-tankman-chapter-2
           fi
           echo "No Project.xml or source files touched; Android APK workflow not triggered."
